@@ -1,0 +1,91 @@
+<p-card styleClass="mx-4 md:mx-8 lg:mx-20 p-4">
+  <ng-template #header>
+    <div class="flex justify-between">
+      <h1 class="text-secondary font-semibold text-xl">Basic Details</h1>
+      <div class="p-2 rounded-sm bg-[#f0ebff] hover:bg-primary-50" (click)="drawerVisible=true">
+        <lucide-angular [img]="Pencil" class="text-[var(--p-primary-color)]" size="16"></lucide-angular>
+      </div>
+    </div>
+
+  </ng-template>
+  <ng-template #content>
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      <div class="flex flex-col">
+        <label class="mb-1 text-sm text-gray-500">Company Name</label>
+        <div class="flex gap-2">
+          <img [src]="application?.logo" height="25" width="25" />
+          <h2 class="text-secondary text-lg font-semibold">
+            {{application?.companyName}}</h2>
+        </div>
+
+      </div>
+      <div class="flex flex-col">
+        <label class="mb-1 text-sm text-gray-500">Role</label>
+        <h2 class="text-secondary text-lg font-semibold">{{application?.role}}</h2>
+      </div>
+      <div class="flex flex-col">
+        <label class="mb-1 text-sm text-gray-500">Location</label>
+        <div class="flex items-center gap-1">
+          <lucide-angular [img]="MapPin" class="text-[var(--p-primary-color)]" size="16"></lucide-angular>
+          <h2 class="text-secondary text-lg font-semibold">{{application?.location}}</h2>
+        </div>
+      </div>
+      <div class="flex flex-col">
+        <label class="mb-1 text-sm text-gray-500">Source</label>
+        <h2 class="text-secondary text-lg font-semibold">{{application?.source}}</h2>
+      </div>
+      <div class="flex flex-col">
+        <label class="mb-1 text-sm text-gray-500">Job Type</label>
+        <h2 class="text-secondary text-lg font-semibold">{{application?.jobType}}</h2>
+      </div>
+      <div class="flex flex-col">
+        <label class="mb-1 text-sm text-gray-500">Status</label>
+        <h2 class="text-secondary text-lg font-semibold">
+          @if(application?.status === 'applied'){
+          <p-tag [value]="application?.status | titlecase " [rounded]="true" />
+          }
+          @else {
+          <p-tag [value]="application?.status | titlecase" [severity]="getSeverity(application?.status)"
+            [rounded]="true" />
+          }
+        </h2>
+      </div>
+      <div class="flex flex-col">
+        <label class="mb-1 text-sm text-gray-500">Date Created</label>
+        <h2 class="text-secondary text-lg font-semibold">{{application?.createdAt | date: 'dd/MM/yyyy'}}</h2>
+      </div>
+    </div>
+  </ng-template>
+</p-card>
+
+<p-card styleClass="mx-4 mt-6 md:mx-8 lg:mx-20 p-4">
+  <ng-template #content>
+    <div [innerHTML]="cleanJobDescription(application?.description)">
+    </div>
+  </ng-template>
+</p-card>
+
+
+<p-card styleClass="mx-4 mb-6 mt-6 md:mx-8 lg:mx-20 p-4">
+  <ng-template #header>
+    <div class="flex justify-between">
+      <h1 class="text-secondary font-semibold text-xl">Time Line</h1>
+    </div>
+  </ng-template>
+  <ng-template #content>
+    <p-timeline [value]="events">
+      <ng-template #content let-event>
+        {{event.status}}
+      </ng-template>
+      <ng-template #opposite let-event>
+        {{event.date | date: 'dd/MM/yyyy'}}
+      </ng-template>
+
+    </p-timeline>
+  </ng-template>
+</p-card>
+
+<app-drawer [drawerVisible]="drawerVisible" [applicationForm]="applicationForm" (cancel)="onCancel()"
+  (submit)="onSubmit()" title="Edit Application">
+
+</app-drawer>

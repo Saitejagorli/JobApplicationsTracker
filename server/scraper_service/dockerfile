@@ -1,0 +1,32 @@
+# Use slim base
+FROM python:3.10-slim
+
+# Set working directory
+WORKDIR /app
+
+# Install system dependencies and clean up in one layer
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl wget gnupg ca-certificates \
+    libnss3 libatk-bridge2.0-0 libxss1 libasound2 \
+    libgbm1 libxshmfence1 libgtk-3-0 libdrm2 libxcomposite1 \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Python dependencies first (to cache pip layer)
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Install Playwright Chromium
+RUN pip install playwright && playwright install chromium
+
+# Copy app code
+COPY ./app ./app
+
+# Environment variable for consistent logs
+ENV PYTHONUNBUFFERED=1
+
+# Expose port
+EXPOSE 5000
+
+# Run the app
+CMD ["python", "-m", "app.main"]
+

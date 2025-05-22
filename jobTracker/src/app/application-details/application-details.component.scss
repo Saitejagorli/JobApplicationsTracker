@@ -1,0 +1,27 @@
+::ng-deep .pulse-ring::before {
+    content: '';
+    position: absolute;
+    width: 120%;
+    height: 120%;
+    background: var(--p-primary-color);
+    border-radius: 9999px;
+    animation: pulse-animation 1.5s ease-out infinite;
+    opacity: 0.6;
+    z-index: -1;
+  }
+  
+  @keyframes pulse-animation {
+    0% {
+      transform: scale(0.9);
+      opacity: 0.6;
+    }
+    50% {
+      transform: scale(1.4);
+      opacity: 0.2;
+    }
+    100% {
+      transform: scale(0.9);
+      opacity: 0.6;
+    }
+  }
+  

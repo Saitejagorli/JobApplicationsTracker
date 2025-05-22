@@ -1,0 +1,111 @@
+<p-drawer [(visible)]="drawerVisible" position="right" styleClass="!w-4/5 lg:!w-2/4">
+    <ng-template #headless>
+        <div class="flex flex-col h-full">
+            <!-- header -->
+            <div class="flex items-center justify-between px-6 py-4 shrink-0" style="box-shadow: 0 4px 8px #3659e214;">
+                <span class="inline-flex items-center gap-2">
+                    <span class="font-semibold text-lg text-secondary">{{title}}</span>
+                </span>
+                <span>
+                    <lucide-angular [img]="XIcon" style="color: var(--p-gray-500)"
+                        (click)="onCancel()"></lucide-angular>
+                </span>
+            </div>
+
+            <!-- body -->
+            <div class="overflow-y-auto flex-1">
+                <form [formGroup]="applicationForm">
+                    <div class="px-6 py-4">
+                        <h2 class="font-semibold text-lg px-2">Basic Details</h2>
+                        <div class="flex flex-wrap justify-center">
+                            <div class="flex flex-col px-2 py-2 lg:py-4 w-full sm:w-11/12 md:w-8/12 lg:w-6/12">
+                                <label for="company-name" class="mb-1 text-sm pl-1">Company Name</label>
+                                <p-autoComplete #companyAutoComplete [suggestions]="filteredCompanies"
+                                    formControlName="companyName" (completeMethod)="searchCompanies($event)"
+                                    field="name" id="company-name" [dropdown]="true" [forceSelection]="true"
+                                    (onSelect)="onCompanySelect($event)" (onDropdownClick)="onDropdownClick()"
+                                    placeholder="Search a company" [showClear]="true" (onClear)="onClear()"
+                                    [fluid]="true"
+                                    [panelStyle]="{ width: companyAutoComplete?.el?.nativeElement?.offsetWidth + 'px' }"
+                                    [inputStyle]="{'padding-right': '2.5rem','overflow': 'hidden','text-overflow': 'ellipsis','white-space': 'nowrap'}">
+                                    <ng-template let-company pTemplate="item">
+                                        <div class="flex gap-2 items-center w-full">
+                                            <img [src]="company.logo" height="25" width="25" class="flex-shrink-0" />
+                                            <span class="overflow-hidden text-ellipsis whitespace-nowrap">{{
+                                                company.name }}</span>
+                                        </div>
+                                    </ng-template>
+                                </p-autoComplete>
+                            </div>
+
+                            <div class="flex flex-col px-2 py-2 lg:py-4 w-full sm:w-11/12 md:w-8/12 lg:w-6/12">
+                                <label for="role" class="mb-1 text-sm pl-1">Role</label>
+                                <input type="text" id="role" pInputText formControlName="role" [fluid]="true"
+                                    placeholder="eg. Software Engineer" />
+                            </div>
+
+                            <div class="flex flex-col px-2 py-2 lg:py-4 w-full sm:w-11/12 md:w-8/12 lg:w-6/12">
+                                <label for="location" class="mb-1 text-sm pl-1">Location</label>
+                                <input type="text" id="text" pInputText formControlName="location" [fluid]="true"
+                                    placeholder="eg. Hyderabad" />
+                            </div>
+
+                            <div class="flex flex-col px-2 py-2 lg:py-4 w-full sm:w-11/12 md:w-8/12 lg:w-6/12">
+                                <label for="source" class="mb-1 text-sm pl-1">Source</label>
+                                <input type="text" id="source" pInputText formControlName="source" [fluid]="true"
+                                    placeholder="eg. Linkedin" />
+                            </div>
+                            <div class="flex flex-col px-2 py-2 lg:py-4 w-full sm:w-11/12 md:w-8/12 lg:w-6/12">
+                                <label for="job-link" class="mb-1 text-sm pl-1">Job Post Link</label>
+                                <input type="text" id="job-link" pInputText formControlName="jobPostLink" [fluid]="true"
+                                    placeholder="eg. www.xyz.com/job/id" />
+                            </div>
+                            <div class="flex flex-col px-2 py-2 lg:py-4 w-full sm:w-11/12 md:w-8/12 lg:w-6/12">
+                                <label for="job-type" class="mb-1 text-sm pl-1">Job Type</label>
+                                <p-select formControlName="jobType" [options]="jobTypes" optionLabel="label"
+                                    optionValue="value" placeholder="Select Job Type">
+                                </p-select>
+
+                            </div>
+                        </div>
+                    </div>
+                    <div formGroupName="statusTimestamps" class="px-6 py-4">
+                        <h2 class="font-semibold text-lg px-2">Status</h2>
+                        <div class="flex flex-wrap justify-center">
+                            <div class="flex flex-col px-2 py-2 lg:py-4 w-full sm:w-11/12 md:w-8/12 lg:w-6/12">
+                                <label for="applieed" class="mb-1 text-sm pl-1">Applied</label>
+                                <p-date-picker id="applied" dateFormat="dd/mm/yy" styleClass="!w-full"
+                                    formControlName="applied" [showIcon]="true" [showClear]="true"
+                                    [autofocus]="false"></p-date-picker>
+                            </div>
+                            <div class="flex flex-col px-2 py-2 lg:py-4 w-full sm:w-11/12 md:w-8/12 lg:w-6/12">
+                                <label for="interviewing" class="mb-1 text-sm pl-1">Interviewing</label>
+                                <p-date-picker id="interviewing" dateFormat="dd/mm/yy" styleClass="!w-full"
+                                    formControlName="interviewing" [showIcon]="true" [showClear]="true"
+                                    [minDate]="statusDate('applied')"></p-date-picker>
+                            </div>
+                            <div class="flex flex-col px-2 py-2 lg:py-4 w-full sm:w-11/12 md:w-8/12 lg:w-6/12">
+                                <label for="offered" class="mb-1 text-sm pl-1">Offered</label>
+                                <p-date-picker id="offered" dateFormat="dd/mm/yy" styleClass="!w-full"
+                                    formControlName="offered" [showIcon]="true" [showClear]="true"
+                                    [minDate]="statusDate('interviewing')"></p-date-picker>
+                            </div>
+                            <div class="flex flex-col px-2 py-2 lg:py-4 w-full sm:w-11/12 md:w-8/12 lg:w-6/12">
+                                <label for="rejected" class="mb-1 text-sm pl-1">Rejected</label>
+                                <p-date-picker id="rejected" dateFormat="dd/mm/yy" styleClass="!w-full"
+                                    formControlName="rejected" [showIcon]="true" [showClear]="true"
+                                    [minDate]="statusDate('applied')"></p-date-picker>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <!-- footer - using shrink-0 to prevent shrinking -->
+            <div class="shrink-0 py-3 px-6 border-t border-solid border-surface flex justify-end items-center gap-4">
+                <button (click)="onCancel()"
+                    class="py-2 px-3 rounded-sm text-primary-400 bg-primary-50 cursor-pointer hover:bg-[#e7dfff] shadow">Cancel</button>
+                <p-button [disabled]="!this.applicationForm.valid" (onClick)="onSubmit()">Submit</p-button>
+            </div>
+        </div>
+    </ng-template>
+</p-drawer>
