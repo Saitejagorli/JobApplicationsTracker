@@ -15,7 +15,13 @@ import { DatePipe } from '@angular/common';
 // --------------------
 // Rxjs Operators
 // ---------------------
-import { debounceTime, distinctUntilChanged, Subject, takeUntil } from 'rxjs';
+import {
+  debounceTime,
+  distinctUntilChanged,
+  Subject,
+  takeUntil,
+  finalize,
+} from 'rxjs';
 
 // --------------------
 // PrimeNg  Modules
@@ -29,7 +35,9 @@ import { InputTextModule } from 'primeng/inputtext';
 import { TagModule } from 'primeng/tag';
 import { FormsModule } from '@angular/forms';
 import { SelectModule } from 'primeng/select';
+import { ToastModule } from 'primeng/toast';
 
+import { MessageService } from 'primeng/api';
 // --------------------
 // Lucide Icons
 // ---------------------
@@ -65,6 +73,7 @@ import { DrawerComponent } from '../drawer/drawer.component';
     ChartModule,
     LucideAngularModule,
     TableModule,
+    ToastModule,
     ButtonModule,
     IconFieldModule,
     InputIconModule,
@@ -72,6 +81,7 @@ import { DrawerComponent } from '../drawer/drawer.component';
     TagModule,
     SelectModule,
   ],
+  providers: [MessageService],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss',
   standalone: true,
@@ -80,7 +90,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
   constructor(
     private appService: ApplicationService,
     private route: ActivatedRoute,
-    private router: Router
+    private router: Router,
+    private messageService: MessageService
   ) {}
 
   readonly ClipboardList = ClipboardList;
@@ -431,7 +442,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     });
   }
 
-  onCancel() {
+  onDrawerClose() {
     this.drawerVisible = false;
     this.applicationForm.reset();
   }
@@ -439,11 +450,37 @@ export class DashboardComponent implements OnInit, OnDestroy {
   onSubmit() {
     this.appService
       .createApplication(this.applicationForm.value)
-      .subscribe((res) => {
-        console.log(res);
-        this.drawerVisible = false;
-        this.applicationForm.reset();
-        this.getApplications();
+      .pipe(
+        finalize(() => {
+          this.drawerVisible = false;
+          this.applicationForm.reset();
+          this.getApplications();
+        })
+      )
+      .subscribe({
+        next: (res: any) => {
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Success',
+            detail: res.message || 'Application created successfully.',
+          });
+        },
+        error: (err: any) => {
+          if (err.status === 400) {
+            this.messageService.add({
+              severity: 'warn',
+              summary: 'Invalid Input',
+              detail:
+                err.error?.message || 'Please check the data and try again.',
+            });
+          } else {
+            this.messageService.add({
+              severity: 'error',
+              summary: 'Error',
+              detail: 'Something went wrong. Please try again later.',
+            });
+          }
+        },
       });
   }
 }

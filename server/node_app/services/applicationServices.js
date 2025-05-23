@@ -24,8 +24,11 @@ const createApplication = async ({
 }) => {
   try {
     const latestStatus = getLatestStatus(statusTimestamps);
+
     if (!latestStatus) {
-      throw new Error("No valid status provided in the timestamps");
+      const error = new Error("No valid status provided in the timestamps");
+      error.statusCode = 400;
+      throw error;
     }
 
     const newApplication = await Application.create({
@@ -46,8 +49,8 @@ const createApplication = async ({
       .then((description) =>
         Application.findByIdAndUpdate(newApplication._id, { description })
       )
-      .catch((err) => {
-        console.error("❌ Summarization failed", err);
+      .catch((summaryError) => {
+        console.error("❌ Summarization failed", summaryError);
         Application.findByIdAndUpdate(newApplication._id, {
           description: "Details Not Found",
         });
@@ -118,7 +121,11 @@ const updateApplication = async (id, updateFields) => {
       updateFields.status = latestStatus;
     }
 
-    await Application.findByIdAndUpdate(id, { $set: updateFields });
+    const application = await Application.findByIdAndUpdate(
+      id,
+      { $set: updateFields },
+      { new: true, runValidators: true }
+    );
 
     if (updateFields.jobPostLink) {
       (async () => {
@@ -135,6 +142,16 @@ const updateApplication = async (id, updateFields) => {
         }
       })();
     }
+    return application;
+  } catch (err) {
+    throw err;
+  }
+};
+
+const deleteApplication = async (id) => {
+  try {
+    const application = await Application.deleteOne({ _id: new ObjectId(id) });
+    return application;
   } catch (err) {
     throw err;
   }
@@ -295,4 +312,5 @@ export {
   getApplicationMetrics,
   getLast6MonthsApplications,
   updateApplication,
+  deleteApplication,
 };

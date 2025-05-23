@@ -2,8 +2,13 @@
   <ng-template #header>
     <div class="flex justify-between">
       <h1 class="text-secondary font-semibold text-xl">Basic Details</h1>
-      <div class="p-2 rounded-sm bg-[#f0ebff] hover:bg-primary-50" (click)="drawerVisible=true">
-        <lucide-angular [img]="Pencil" class="text-[var(--p-primary-color)]" size="16"></lucide-angular>
+      <div class="flex gap-2">
+        <div class="p-2 rounded-sm bg-[#f0ebff] hover:bg-primary-50" (click)="drawerVisible=true">
+          <lucide-angular [img]="Pencil" class="text-[var(--p-primary-color)]" size="16"></lucide-angular>
+        </div>
+        <div class="p-2 rounded-sm bg-[#f0ebff] hover:bg-primary-50" (click)="deleteDialogVisible=true">
+          <lucide-angular [img]="Trash" class="text-[var(--p-primary-color)]" size="16"></lucide-angular>
+        </div>
       </div>
     </div>
 
@@ -85,7 +90,16 @@
   </ng-template>
 </p-card>
 
-<app-drawer [drawerVisible]="drawerVisible" [applicationForm]="applicationForm" (cancel)="onCancel()"
+<app-drawer [drawerVisible]="drawerVisible" [applicationForm]="applicationForm" (close)="handleDrawerClose()"
   (submit)="onSubmit()" title="Edit Application">
-
 </app-drawer>
+
+<app-dialog [visible]="deleteDialogVisible" title="Delete Application" btnText="Delete"
+  (close)="handleDeleteDialogClose()" (submit)="onDeleteConfirm()">
+  <img src="question.svg" style="height: 200px;" />
+  <div class="flex justify-center items-center mt-4">
+    <h2>Do you want to Delete this Application ?</h2>
+  </div>
+</app-dialog>
+
+<p-toast />

@@ -8,6 +8,7 @@ import {
   updateApplicationByID,
   getChartData,
   getMetrics,
+  deleteApplicationByID,
 } from "../controllers/applicationController.js";
 
 router.get("/", getAllApplications);
@@ -16,4 +17,5 @@ router.get("/metrics", getMetrics);
 router.get("/chart", getChartData);
 router.get("/:id", getApplicationByID);
 router.patch("/:id", updateApplicationByID);
+router.delete("/:id", deleteApplicationByID);
 export { router as applicationRoutes };

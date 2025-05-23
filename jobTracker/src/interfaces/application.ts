@@ -5,6 +5,7 @@ export abstract class Application {
   abstract getApplication(id: string): Observable<any>;
   abstract updateApplication(id: string, updateFields: any): Observable<any>;
   abstract createApplication(data: any): Observable<any>;
+  abstract deleteApplication(id: string): Observable<any>;
   abstract getApplicationMetrics(): Observable<any>;
   abstract getChartData(): Observable<any>;
 }

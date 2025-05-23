@@ -8,7 +8,7 @@
                 </span>
                 <span>
                     <lucide-angular [img]="XIcon" style="color: var(--p-gray-500)"
-                        (click)="onCancel()"></lucide-angular>
+                        (click)="onClose()"></lucide-angular>
                 </span>
             </div>
 
@@ -102,8 +102,8 @@
             </div>
             <!-- footer - using shrink-0 to prevent shrinking -->
             <div class="shrink-0 py-3 px-6 border-t border-solid border-surface flex justify-end items-center gap-4">
-                <button (click)="onCancel()"
-                    class="py-2 px-3 rounded-sm text-primary-400 bg-primary-50 cursor-pointer hover:bg-[#e7dfff] shadow">Cancel</button>
+                <button (click)="onClose()"
+                    class="py-2 px-3 rounded-sm text-primary-400 bg-[#f0ebff] hover:bg-primary-50 cursor-pointer hover:bg-[#e7dfff] shadow">Cancel</button>
                 <p-button [disabled]="!this.applicationForm.valid" (onClick)="onSubmit()">Submit</p-button>
             </div>
         </div>

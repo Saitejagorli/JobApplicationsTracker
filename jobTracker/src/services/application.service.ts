@@ -32,6 +32,9 @@ export class ApplicationService implements Application {
   createApplication(data: any): Observable<any> {
     return this.http.post(`${environment.BASE_API}/applications`, data);
   }
+  deleteApplication(id: string): Observable<any> {
+    return this.http.delete(`${environment.BASE_API}/applications/${id}`);
+  }
   getApplicationMetrics(): Observable<any> {
     return this.http.get(`${environment.BASE_API}/applications/metrics`);
   }

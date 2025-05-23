@@ -57,7 +57,7 @@ export class DrawerComponent implements OnInit, OnDestroy {
   @Input({ required: true }) applicationForm!: any;
   @Input({ required: true }) title!: string;
 
-  @Output() cancel = new EventEmitter<void>();
+  @Output() close = new EventEmitter<void>();
   @Output() submit = new EventEmitter<void>();
 
   @ViewChild('companyAutoComplete') companyAutoComplete!: any;
@@ -147,8 +147,8 @@ export class DrawerComponent implements OnInit, OnDestroy {
     });
   }
 
-  onCancel() {
-    this.cancel.emit();
+  onClose() {
+    this.close.emit();
   }
   private initCompanySearch(): void {
     this.companySearchSubject

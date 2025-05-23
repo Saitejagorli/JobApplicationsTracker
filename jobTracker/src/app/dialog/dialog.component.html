@@ -1,0 +1,23 @@
+<p-dialog [(visible)]="visible" [modal]="true" [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }"
+    [style]="{ width: '40rem' }">
+    <ng-template #headless>
+        <!-- header -->
+        <div class="h-10 flex items-center px-4 py-6 justify-between border-b border-solid border-surface mb-2">
+            <h3 class="text-lg font-semibold text-gray-500">{{title}}</h3>
+            <lucide-angular [img]="XIcon" style="color: var(--p-gray-500)" (click)="onClose()"></lucide-angular>
+        </div>
+        <!-- body -->
+        <ng-content>
+
+        </ng-content>
+        <!---footer-->
+        <div class="h-11 flex items-center px-4 py-6 justify-end gap-10 border-t border-solid border-surface mt-2">
+            <button type="button"
+                class="px-[8px] py-[5px] rounded-sm text-primary-400 bg-[#f0ebff] hover:bg-primary-50 cursor-pointer"
+                (click)="onClose()">
+                Cancel
+            </button>
+            <p-button [disabled]="false" [style]="{'padding':'5px 8px'}" (onClick)="onSubmit()">{{btnText}}</p-button>
+        </div>
+    </ng-template>
+</p-dialog>

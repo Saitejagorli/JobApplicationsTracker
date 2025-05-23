@@ -1,6 +1,7 @@
 import { Component, inject, OnInit, ViewChild } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import {
   FormGroup,
   FormBuilder,
@@ -11,13 +12,17 @@ import {
 import { CardModule } from 'primeng/card';
 import { TagModule } from 'primeng/tag';
 import { TimelineModule } from 'primeng/timeline';
+import { ToastModule } from 'primeng/toast';
 
-import { LucideAngularModule, Pencil, MapPin } from 'lucide-angular';
+import { MessageService } from 'primeng/api';
+
+import { LucideAngularModule, Pencil, MapPin, Trash } from 'lucide-angular';
+
+import { finalize } from 'rxjs';
 
 import { ApplicationService } from '../../services/application.service';
 import { DrawerComponent } from '../drawer/drawer.component';
-
-import { DatePipe } from '@angular/common';
+import { DialogComponent } from '../dialog/dialog.component';
 
 @Component({
   selector: 'app-application-details',
@@ -30,7 +35,10 @@ import { DatePipe } from '@angular/common';
     LucideAngularModule,
     DatePipe,
     ReactiveFormsModule,
+    DialogComponent,
+    ToastModule,
   ],
+  providers: [MessageService],
   templateUrl: './application-details.component.html',
   styleUrl: './application-details.component.scss',
   standalone: true,
@@ -38,6 +46,7 @@ import { DatePipe } from '@angular/common';
 export class ApplicationDetailsComponent implements OnInit {
   readonly Pencil = Pencil;
   readonly MapPin = MapPin;
+  readonly Trash = Trash;
 
   formBuilder = inject(FormBuilder);
 
@@ -46,12 +55,15 @@ export class ApplicationDetailsComponent implements OnInit {
   events: any;
 
   drawerVisible: boolean = false;
+  deleteDialogVisible: boolean = false;
 
   applicationForm: any;
 
   constructor(
     private appService: ApplicationService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private router: Router,
+    private messageService: MessageService
   ) {
     this.id = this.route.snapshot.paramMap.get('id') || '';
   }
@@ -138,9 +150,58 @@ export class ApplicationDetailsComponent implements OnInit {
     return updateFields;
   };
 
-  onCancel() {
+  handleDrawerClose() {
     this.drawerVisible = false;
     this.initApplicationForm();
+  }
+
+  handleDeleteDialogClose() {
+    this.deleteDialogVisible = false;
+  }
+
+  onDeleteConfirm(): void {
+    this.appService
+      .deleteApplication(this.id)
+      .pipe(
+        finalize(() => {
+          this.deleteDialogVisible = false;
+        })
+      )
+      .subscribe({
+        next: () => {
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Success',
+            detail: 'Deleted Successfully',
+          });
+          setTimeout(() => {
+            this.router.navigate(['/']);
+          }, 800);
+        },
+
+        error: (err) => {
+          this.deleteDialogVisible = false;
+          if (err.status === 404) {
+            this.messageService.add({
+              severity: 'warn',
+              summary: 'Not Found',
+              detail: 'Application not found.',
+            });
+          } else if (err.status === 400) {
+            this.messageService.add({
+              severity: 'error',
+              summary: 'Invalid Request',
+              detail: 'Invalid Application ID.',
+            });
+          } else {
+            this.messageService.add({
+              severity: 'error',
+              summary: 'Error',
+              detail: 'Something went wrong. Please try again later.',
+            });
+          }
+        },
+      });
   }
 
   onSubmit() {
@@ -155,12 +216,36 @@ export class ApplicationDetailsComponent implements OnInit {
     if (updateFields && Object.keys(updateFields).length > 0) {
       this.appService
         .updateApplication(this.id, updateFields)
-        .subscribe((res) => {
-          console.log(res);
-          this.drawerVisible = false;
-          this.applicationForm.reset();
-          this.getApplication();
+        .pipe(
+          finalize(() => {
+            this.drawerVisible = false;
+            this.applicationForm.reset();
+            this.getApplication();
+          })
+        )
+        .subscribe({
+          next: (res) => {
+            this.messageService.add({
+              severity: 'success',
+              summary: 'Success',
+              detail: 'Application updated successfully',
+            });
+          },
+          error: (err) => {
+            console.error(err);
+            this.messageService.add({
+              severity: 'error',
+              summary: 'Error',
+              detail: 'Failed to update application',
+            });
+          },
         });
+    } else {
+      this.messageService.add({
+        severity: 'info',
+        summary: 'No Changes',
+        detail: 'There are no updates to save',
+      });
     }
   }
 }
