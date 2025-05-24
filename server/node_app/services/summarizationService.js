@@ -73,7 +73,7 @@ async function summarizeJobPost(url) {
 
           - <p><strong>Posted Date:</strong> ...</p>
           - <p><strong>Application Deadline:</strong> ...</p>
-          - <p><strong>Application Link:</strong> <a href="${url}" class="text-blue-600 underline" target="_blank" rel="noopener noreferrer">${url}</a></p>
+          - <p><strong>Application Link:</strong> <a href="${url}" class="text-primary-600" target="_blank" rel="noopener noreferrer"></a></p>
 
           ---
 
@@ -83,6 +83,7 @@ async function summarizeJobPost(url) {
           - ❌ Add inline styles, scripts, or unnecessary HTML attributes
           - ❌ Hallucinate or fabricate any job details or links
           - ❌ Output empty tags or placeholders (e.g., \`<h2></h2>\`, \`<ul></ul>\`)
+          - ❌ Give the Job posted date if mentioned otherwise don't mention it
 
           ---
 

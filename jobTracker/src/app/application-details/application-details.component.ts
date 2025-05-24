@@ -13,12 +13,13 @@ import { CardModule } from 'primeng/card';
 import { TagModule } from 'primeng/tag';
 import { TimelineModule } from 'primeng/timeline';
 import { ToastModule } from 'primeng/toast';
+import { SkeletonModule } from 'primeng/skeleton';
 
 import { MessageService } from 'primeng/api';
 
 import { LucideAngularModule, Pencil, MapPin, Trash } from 'lucide-angular';
 
-import { finalize } from 'rxjs';
+import { finalize, switchMap, takeWhile, timer } from 'rxjs';
 
 import { ApplicationService } from '../../services/application.service';
 import { DrawerComponent } from '../drawer/drawer.component';
@@ -37,6 +38,7 @@ import { DialogComponent } from '../dialog/dialog.component';
     ReactiveFormsModule,
     DialogComponent,
     ToastModule,
+    SkeletonModule
   ],
   providers: [MessageService],
   templateUrl: './application-details.component.html',
@@ -70,18 +72,24 @@ export class ApplicationDetailsComponent implements OnInit {
 
   ngOnInit(): void {
     this.getApplication();
+    this.pollApplication();
   }
 
   private getApplication(): void {
-    this.appService.getApplication(this.id).subscribe((res) => {
-      this.application = res.data;
-      this.initApplicationForm();
-      this.events = Object.entries(res.data.statusTimestamps)
-        .filter(([_, date]) => date !== null)
-        .map(([status, date]) => ({
-          status: status.charAt(0).toUpperCase() + status.slice(1),
-          date: new Date(date as string).toLocaleDateString(),
-        }));
+    this.appService.getApplication(this.id).subscribe({
+      next: (res) => {
+        this.application = res.data;
+        this.initApplicationForm();
+        this.events = Object.entries(res.data.statusTimestamps)
+          .filter(([_, date]) => date !== null)
+          .map(([status, date]) => ({
+            status: status.charAt(0).toUpperCase() + status.slice(1),
+            date: new Date(date as string).toLocaleDateString(),
+          }));
+      },
+      error: (err) => {
+        this.router.navigate(['/page-not-found']);
+      },
     });
   }
 
@@ -116,6 +124,22 @@ export class ApplicationDetailsComponent implements OnInit {
         ],
       }),
     });
+  }
+
+  pollApplication() {
+    timer(0, 3000)
+      .pipe(
+        switchMap(() => this.appService.getApplication(this.id)),
+        takeWhile((res) => res.data.description === 'Processing...', true)
+      )
+      .subscribe({
+        next: (res) => {
+          this.application.description = res.data.description;
+        },
+        error: (err) => {
+          console.error('Failed to fetch application', err);
+        },
+      });
   }
 
   cleanJobDescription(rawDescription: string): string {

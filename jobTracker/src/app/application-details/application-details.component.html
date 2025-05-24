@@ -59,14 +59,33 @@
         <label class="mb-1 text-sm text-gray-500">Date Created</label>
         <h2 class="text-secondary text-lg font-semibold">{{application?.createdAt | date: 'dd/MM/yyyy'}}</h2>
       </div>
+      <div class="flex text-lg font-semibold text-primary-400 cursor-pointer hover:text-primary-300 items-center">
+        <a [href]="application?.jobPostLink" target="_blank">ApplicationLink</a>
+      </div>
     </div>
   </ng-template>
 </p-card>
 
 <p-card styleClass="mx-4 mt-6 md:mx-8 lg:mx-20 p-4">
   <ng-template #content>
+    @if(application?.description === 'Processing...'){
+    <p-skeleton styleClass="mb-2" borderRadius="16px" />
+    <p-skeleton width="10rem" styleClass="mb-2" borderRadius="16px" />
+    <p-skeleton width="5rem" styleClass="mb-2" borderRadius="16px" />
+    <p-skeleton styleClass="mb-2" borderRadius="16px" />
+    <p-skeleton width="10rem" styleClass="mb-2" borderRadius="16px" />
+    <p-skeleton width="5rem" styleClass="mb-2" borderRadius="16px" />
+    <p-skeleton styleClass="mb-2" borderRadius="16px" />
+    <p-skeleton width="10rem" styleClass="mb-2" borderRadius="16px" />
+    <p-skeleton width="5rem" styleClass="mb-2" borderRadius="16px" />
+    <p-skeleton styleClass="mb-2" borderRadius="16px" />
+    <p-skeleton width="10rem" styleClass="mb-2" borderRadius="16px" />
+    <p-skeleton width="5rem" styleClass="mb-2" borderRadius="16px" />
+    }
+    @else {
     <div [innerHTML]="cleanJobDescription(application?.description)">
     </div>
+    }
   </ng-template>
 </p-card>
 
@@ -91,7 +110,7 @@
 </p-card>
 
 <app-drawer [drawerVisible]="drawerVisible" [applicationForm]="applicationForm" (close)="handleDrawerClose()"
-  (submit)="onSubmit()" title="Edit Application">
+  (submit)="onSubmit()" title="Edit Application" btnText="Save">
 </app-drawer>
 
 <app-dialog [visible]="deleteDialogVisible" title="Delete Application" btnText="Delete"
@@ -102,4 +121,4 @@
   </div>
 </app-dialog>
 
-<p-toast />
+<p-toast [breakpoints]="{ '920px': { width: '90%' } }" />

@@ -104,7 +104,7 @@
             <div class="shrink-0 py-3 px-6 border-t border-solid border-surface flex justify-end items-center gap-4">
                 <button (click)="onClose()"
                     class="py-2 px-3 rounded-sm text-primary-400 bg-[#f0ebff] hover:bg-primary-50 cursor-pointer hover:bg-[#e7dfff] shadow">Cancel</button>
-                <p-button [disabled]="!this.applicationForm.valid" (onClick)="onSubmit()">Submit</p-button>
+                <p-button [disabled]="!this.applicationForm.valid" (onClick)="onSubmit()">{{btnText}}</p-button>
             </div>
         </div>
     </ng-template>

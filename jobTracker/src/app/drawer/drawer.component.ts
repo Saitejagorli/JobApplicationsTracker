@@ -56,6 +56,7 @@ export class DrawerComponent implements OnInit, OnDestroy {
   @Input({ required: true }) drawerVisible!: boolean;
   @Input({ required: true }) applicationForm!: any;
   @Input({ required: true }) title!: string;
+  @Input() btnText : string = 'Submit';
 
   @Output() close = new EventEmitter<void>();
   @Output() submit = new EventEmitter<void>();
