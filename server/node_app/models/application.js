@@ -1,5 +1,18 @@
 import mongoose from "mongoose";
 
+const questionSchema = new mongoose.Schema({
+  id: { type: String, required: true },
+  question: { type: String, required: true },
+  _id: false,
+});
+
+const sectionSchema = new mongoose.Schema({
+  id: { type: String, required: true },
+  sectionName: { type: String, required: true },
+  questions: [questionSchema],
+  _id: false,
+});
+
 const applicationSchema = new mongoose.Schema({
   companyName: {
     type: String,
@@ -69,6 +82,7 @@ const applicationSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+  interviewQuestions: [sectionSchema],
 });
 
 const Application = mongoose.model("Application", applicationSchema);

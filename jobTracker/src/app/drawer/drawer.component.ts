@@ -56,7 +56,7 @@ export class DrawerComponent implements OnInit, OnDestroy {
   @Input({ required: true }) drawerVisible!: boolean;
   @Input({ required: true }) applicationForm!: any;
   @Input({ required: true }) title!: string;
-  @Input() btnText : string = 'Submit';
+  @Input() btnText: string = 'Submit';
 
   @Output() close = new EventEmitter<void>();
   @Output() submit = new EventEmitter<void>();
@@ -108,9 +108,23 @@ export class DrawerComponent implements OnInit, OnDestroy {
     const offered = statusTimestampsGroup?.get('offered');
     const rejected = statusTimestampsGroup?.get('rejected');
 
+    const appliedValue = applied?.value;
+    const interviewingValue = interviewing?.value;
+    const offeredValue = offered?.value;
+    const rejectedValue = rejected?.value;
+
     interviewing?.disable();
     offered?.disable();
     rejected?.disable();
+
+    if (appliedValue) {
+      interviewing?.enable();
+      rejected?.enable();
+
+      if (interviewingValue) {
+        offered?.enable();
+      }
+    }
 
     applied?.valueChanges.subscribe((value) => {
       if (value) {
@@ -200,7 +214,9 @@ export class DrawerComponent implements OnInit, OnDestroy {
   }
 
   statusDate(control: string): Date | null {
-    const date = this.applicationForm.get('statusTimestamps')?.get(control)?.value;
+    const date = this.applicationForm
+      .get('statusTimestamps')
+      ?.get(control)?.value;
     return date ? date : null;
   }
 
