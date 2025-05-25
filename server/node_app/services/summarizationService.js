@@ -4,7 +4,7 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY); 
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 async function summarizeJobPost(url) {
   try {
@@ -17,7 +17,7 @@ async function summarizeJobPost(url) {
 
     const data = await response.json();
     const markdown = data.markdown;
-  
+
     const prompt = `
           You are a highly skilled **job post parser and HTML generator**.
 
@@ -106,6 +106,7 @@ async function summarizeJobPost(url) {
           🔗 If the markdown is insufficient or empty, attempt to extract structured information directly from the provided link:
           **${url}**
           `;
+
     // Get Gemini model
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" }); // You can also use "gemini-pro"
 

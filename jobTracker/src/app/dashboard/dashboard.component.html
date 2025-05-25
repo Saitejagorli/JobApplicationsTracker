@@ -119,7 +119,7 @@
 
   <p-table #table [value]="applications" stripedRows [rows]="rows" [first]="first"
     [rowsPerPageOptions]="rowsPerPageOptions" [paginator]="true" [globalFilterFields]="['status']"
-    [totalRecords]="totalRecords" [lazy]="true" (onLazyLoad)="loadApplicationsLazy($event)" [loading]="loading">
+    [totalRecords]="totalRecords" [lazy]="true" (onLazyLoad)="loadApplicationsLazy($event)">
 
     <ng-template #caption>
       <div class="flex flex-wrap items-center justify-between gap-4">

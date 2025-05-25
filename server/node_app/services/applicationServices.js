@@ -45,16 +45,7 @@ const createApplication = async ({
       description: "Processing...", // placeholder
     });
 
-    summarizeJobPost(jobPostLink)
-      .then((description) =>
-        Application.findByIdAndUpdate(newApplication._id, { description })
-      )
-      .catch((summaryError) => {
-        console.error("❌ Summarization failed", summaryError);
-        Application.findByIdAndUpdate(newApplication._id, {
-          description: "Details Not Found",
-        });
-      });
+    processJobPostDescription(newApplication._id, jobPostLink);
 
     return newApplication._id;
   } catch (err) {
@@ -121,6 +112,10 @@ const updateApplication = async (id, updateFields) => {
       updateFields.status = latestStatus;
     }
 
+    if (updateFields.jobPostLink) {
+      updateFields.description = "Processing...";
+    }
+
     const application = await Application.findByIdAndUpdate(
       id,
       { $set: updateFields },
@@ -128,19 +123,7 @@ const updateApplication = async (id, updateFields) => {
     );
 
     if (updateFields.jobPostLink) {
-      (async () => {
-        try {
-          const description = await summarizeJobPost(updateFields.jobPostLink);
-          await Application.findByIdAndUpdate(new ObjectId(id), {
-            description,
-          });
-        } catch (err) {
-          console.error("❌ Summarization failed", err);
-          await Application.findByIdAndUpdate(id, {
-            description: "Details Not Found",
-          });
-        }
-      })();
+      processJobPostDescription(id, updateFields.jobPostLink);
     }
     return application;
   } catch (err) {
@@ -303,6 +286,18 @@ const getLast6MonthsApplications = async () => {
     currentDate.setMonth(currentDate.getMonth() + 1);
   }
   return chartData;
+};
+
+const processJobPostDescription = async (id, jobPostLink) => {
+  try {
+    const description = await summarizeJobPost(jobPostLink);
+    await Application.findByIdAndUpdate(id, { description });
+  } catch (err) {
+    console.error("❌ Summarization failed", err.message);
+    await Application.findByIdAndUpdate(id, {
+      description: "Details Not Found",
+    });
+  }
 };
 
 export {

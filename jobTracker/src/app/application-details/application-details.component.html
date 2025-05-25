@@ -1,3 +1,7 @@
+@if(isLoading){
+<app-loading-spinner />
+}
+@else {
 <p-card styleClass="mx-4 md:mx-8 lg:mx-20 p-4">
   <ng-template #header>
     <div class="flex justify-between">
@@ -47,10 +51,10 @@
         <label class="mb-1 text-sm text-gray-500">Status</label>
         <h2 class="text-secondary text-lg font-semibold">
           @if(application?.status === 'applied'){
-          <p-tag [value]="application?.status | titlecase " [rounded]="true" />
+          <p-tag [value]="application?.status ?? ' ' | titlecase " [rounded]="true" />
           }
           @else {
-          <p-tag [value]="application?.status | titlecase" [severity]="getSeverity(application?.status)"
+          <p-tag [value]="application?.status ?? ' ' | titlecase" [severity]="getSeverity(application?.status ?? ' ')"
             [rounded]="true" />
           }
         </h2>
@@ -83,7 +87,7 @@
     <p-skeleton width="5rem" styleClass="mb-2" borderRadius="16px" />
     }
     @else {
-    <div [innerHTML]="cleanJobDescription(application?.description)">
+    <div [innerHTML]="cleanJobDescription(application?.description ?? ' ')">
     </div>
     }
   </ng-template>
@@ -109,6 +113,83 @@
   </ng-template>
 </p-card>
 
+<p-card styleClass="mx-4 mt-6 mb-6 md:mx-8 lg:mx-20 p-4">
+  <div class="mb-4 flex justify-between items-center">
+    <h1 class="text-xl font-semibold leading-5">Questions Section</h1>
+    @if(questionsEditable){
+    <div class="py-3 px-6 flex justify-end items-center gap-4">
+      <button
+        class="py-2 px-3 rounded-sm text-primary-400 bg-[#f0ebff] hover:bg-primary-50 cursor-pointer hover:bg-[#e7dfff] shadow"
+        (click)="toggleQuestions()">Cancel</button>
+      <p-button [disabled]="!this.questionsForm.valid" (onClick)="onQuestionFormSubmit()">Submit</p-button>
+    </div>
+    }
+    @else {
+    <div class="p-2 rounded-sm bg-[#f0ebff] hover:bg-primary-50" (click)="toggleQuestions()">
+      <lucide-angular [img]="Pencil" class="text-[var(--p-primary-color)]" size="16"></lucide-angular>
+    </div>
+    }
+  </div>
+  <div>
+    @if(questionsEditable){
+    <form [formGroup]="questionsForm">
+      <div formArrayName="sections">
+        @for(section of sections.controls; track section.get('id')?.value; let sectionIndex = $index) {
+        <div [formGroupName]="sectionIndex" class="mt-4 mb-4">
+          <div class="flex gap-2 mb-2 mt-2">
+            <input type="text" pInputText formControlName="sectionName" [fluid]="true"
+              placeholder="eg. Technical Interview" />
+            <div class="p-2 rounded-sm bg-[#f0ebff] hover:bg-primary-50 flex justify-between items-center"
+              (click)="removeSection(sectionIndex)">
+              <lucide-angular [img]="Minus" class="text-[var(--p-primary-color)]" size="16"></lucide-angular>
+            </div>
+          </div>
+          <div formArrayName="questions" class="lg:ml-12 ml-6">
+            <div class="border-l border-l-gray-400 pl-4  ">
+              @for(question of getQuestions(sectionIndex).controls; track question.get('id')?.value; let questionIndex =
+              $index) {
+              <div [formGroupName]="questionIndex">
+                <div class="flex gap-2 mb-2 mt-2 lg:pr-12 pr-8 mr-2">
+                  <input type="text" pInputText formControlName="question"
+                    placeholder="eg. Explain the event loop in Nodejs" [fluid]="true" />
+                  <div class="p-2 rounded-sm bg-[#f0ebff] hover:bg-primary-50 flex justify-between items-center"
+                    (click)="removeQuestion(sectionIndex,questionIndex)">
+                    <lucide-angular [img]="Minus" class="text-[var(--p-primary-color)]" size="16"></lucide-angular>
+                  </div>
+                </div>
+              </div>
+              }
+            </div>
+            <p-button icon="pi pi-plus" label="Add" (click)="addQuestion(sectionIndex)" styleClass="ml-5" />
+          </div>
+        </div>
+        }
+        <p-button icon="pi pi-plus" label="Add" (click)="addSection()" />
+      </div>
+    </form>
+    }
+    @else {
+    <p-accordion [value]="0">
+      @for(section of application?.interviewQuestions;track i; let i= $index){
+      <p-accordion-panel [value]="i">
+        <p-accordion-header>
+          {{ section.sectionName }}
+        </p-accordion-header>
+        <p-accordion-content>
+          <ul class="m-0 list-disc pl-5">
+            @for(q of section.questions;track j; let j = $index ){
+            <li> {{ q.question }}</li>
+            }
+          </ul>
+        </p-accordion-content>
+      </p-accordion-panel>
+      }
+    </p-accordion>
+    }
+
+  </div>
+</p-card>
+
 <app-drawer [drawerVisible]="drawerVisible" [applicationForm]="applicationForm" (close)="handleDrawerClose()"
   (submit)="onSubmit()" title="Edit Application" btnText="Save">
 </app-drawer>
@@ -122,3 +203,4 @@
 </app-dialog>
 
 <p-toast [breakpoints]="{ '920px': { width: '90%' } }" />
+}
