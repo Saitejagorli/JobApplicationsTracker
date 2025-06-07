@@ -455,6 +455,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
           this.drawerVisible = false;
           this.applicationForm.reset();
           this.getApplications();
+          this.initDashboard();
         })
       )
       .subscribe({
