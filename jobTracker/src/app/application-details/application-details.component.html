@@ -22,7 +22,7 @@
       <div class="flex flex-col">
         <label class="mb-1 text-sm text-gray-500">Company Name</label>
         <div class="flex gap-2">
-          <img [src]="application?.logo" height="25" width="25" />
+          <img [src]="application?.logo" height="25px" width="25px" style="object-fit: contain;" />
           <h2 class="text-secondary text-lg font-semibold">
             {{application?.companyName}}</h2>
         </div>
@@ -204,3 +204,55 @@
 
 <p-toast [breakpoints]="{ '920px': { width: '90%' } }" />
 }
+
+<p-card styleClass="mx-4 mt-6 md:mx-8 lg:mx-20 p-4 mb-6">
+  <div class="mb-4 flex justify-between items-center">
+    <div class="flex gap-1">
+      <lucide-angular [img]="Paperclip" class="text-[var(--p-primary-color)]" size="20"></lucide-angular>
+      <h1 class="text-xl font-semibold leading-5">Attachments</h1>
+    </div>
+    <p-button icon="pi pi-upload" label="Upload" />
+  </div>
+  <div>
+     <div class="flex justify-between">
+      <div class="flex gap-2 mb-4">
+        <lucide-angular [img]="FileText" class="text-[var(--p-primary-color)]" size="20"></lucide-angular>
+        <h3>Tata Consultancy Services Offer Letter.pdf</h3>
+      </div>
+      <h3>45.5 mb</h3>
+      <h3>24 July 2025 7:45 am</h3>
+      <div class="flex gap-4">
+        <lucide-angular [img]="Eye" class="text-[var(--p-primary-color)] cursor-pointer" size="25"></lucide-angular>
+        <lucide-angular [img]="ArrowDownToLine" class="text-[var(--p-primary-color)] cursor-pointer" size="25"></lucide-angular>
+      </div>
+    </div>
+    <div class="flex justify-between">
+      <div class="flex gap-2 mb-4">
+        <lucide-angular [img]="FileText" class="text-[var(--p-primary-color)]" size="20"></lucide-angular>
+        <h3>Tata Consultancy Services Offer Letter.pdf</h3>
+      </div>
+      <h3>45.5 mb</h3>
+      <h3>24 July 2025 7:45 am</h3>
+      <div class="flex gap-4">
+        <lucide-angular [img]="Eye" class="text-[var(--p-primary-color)] cursor-pointer" size="25"></lucide-angular>
+        <lucide-angular [img]="ArrowDownToLine" class="text-[var(--p-primary-color)] cursor-pointer" size="25"></lucide-angular>
+      </div>
+    </div>
+    <div class="flex justify-between">
+      <div class="flex gap-2 mb-4">
+        <lucide-angular [img]="FileText" class="text-[var(--p-primary-color)]" size="20"></lucide-angular>
+        <h3>Tata Consultancy Services Offer Letter.pdf</h3>
+      </div>
+      <h3>45.5 mb</h3>
+      <h3>24 July 2025 7:45 am</h3>
+      <div class="flex gap-4">
+        <lucide-angular [img]="Eye" class="text-[var(--p-primary-color)] cursor-pointer" size="25"></lucide-angular>
+        <lucide-angular [img]="ArrowDownToLine" class="text-[var(--p-primary-color)] cursor-pointer" size="25"></lucide-angular>
+      </div>
+    </div>
+    <div class="flex gap-2 mb-4">
+      <lucide-angular [img]="Image" class="text-[var(--p-primary-color)]" size="20"></lucide-angular>
+      <h3>tcs.jpeg</h3>
+    </div>
+  </div>
+</p-card>

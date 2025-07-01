@@ -115,6 +115,7 @@ async function summarizeJobPost(url) {
     const responseText = result.response.text();
     return responseText;
   } catch (error) {
+    console.log(error);
     throw error;
   }
 }
