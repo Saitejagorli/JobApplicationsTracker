@@ -29,6 +29,11 @@ import {
   MapPin,
   Trash,
   Minus,
+  Paperclip,
+  FileText,
+  Image,
+  Eye,
+  ArrowDownToLine,
 } from 'lucide-angular';
 
 import { finalize, switchMap, takeWhile, timer } from 'rxjs';
@@ -95,6 +100,11 @@ export class ApplicationDetailsComponent implements OnInit {
   readonly MapPin = MapPin;
   readonly Trash = Trash;
   readonly Minus = Minus;
+  readonly Paperclip = Paperclip;
+  readonly FileText = FileText;
+  readonly Image = Image;
+  readonly Eye = Eye;
+  readonly ArrowDownToLine = ArrowDownToLine;
 
   formBuilder = inject(FormBuilder);
 
