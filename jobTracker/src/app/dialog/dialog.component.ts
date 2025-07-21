@@ -15,6 +15,7 @@ export class DialogComponent {
   @Input({ required: true }) visible!: boolean;
   @Input({ required: true }) title!: string;
   @Input({ required: true }) btnText!: string;
+  @Input() btnDisable : boolean = false;
 
   @Output() close = new EventEmitter<void>();
   @Output() submit = new EventEmitter<void>();

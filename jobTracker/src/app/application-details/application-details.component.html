@@ -10,7 +10,7 @@
         <div class="p-2 rounded-sm bg-[#f0ebff] hover:bg-primary-50" (click)="drawerVisible=true">
           <lucide-angular [img]="Pencil" class="text-[var(--p-primary-color)]" size="16"></lucide-angular>
         </div>
-        <div class="p-2 rounded-sm bg-[#f0ebff] hover:bg-primary-50" (click)="deleteDialogVisible=true">
+        <div class="p-2 rounded-sm bg-[#f0ebff] hover:bg-primary-50" (click)="openDeleteDialog('application')">
           <lucide-angular [img]="Trash" class="text-[var(--p-primary-color)]" size="16"></lucide-angular>
         </div>
       </div>
@@ -190,69 +190,106 @@
   </div>
 </p-card>
 
-<app-drawer [drawerVisible]="drawerVisible" [applicationForm]="applicationForm" (close)="handleDrawerClose()"
-  (submit)="onSubmit()" title="Edit Application" btnText="Save">
-</app-drawer>
-
-<app-dialog [visible]="deleteDialogVisible" title="Delete Application" btnText="Delete"
-  (close)="handleDeleteDialogClose()" (submit)="onDeleteConfirm()">
-  <img src="question.svg" style="height: 200px;" />
-  <div class="flex justify-center items-center mt-4">
-    <h2>Do you want to Delete this Application ?</h2>
-  </div>
-</app-dialog>
-
-<p-toast [breakpoints]="{ '920px': { width: '90%' } }" />
-}
-
 <p-card styleClass="mx-4 mt-6 md:mx-8 lg:mx-20 p-4 mb-6">
   <div class="mb-4 flex justify-between items-center">
     <div class="flex gap-1">
       <lucide-angular [img]="Paperclip" class="text-[var(--p-primary-color)]" size="20"></lucide-angular>
       <h1 class="text-xl font-semibold leading-5">Attachments</h1>
     </div>
-    <p-button icon="pi pi-upload" label="Upload" />
+    <p-button icon="pi pi-plus" label="Add" (onClick)="uploadDialogueVisible = true" />
   </div>
-  <div>
-     <div class="flex justify-between">
-      <div class="flex gap-2 mb-4">
-        <lucide-angular [img]="FileText" class="text-[var(--p-primary-color)]" size="20"></lucide-angular>
-        <h3>Tata Consultancy Services Offer Letter.pdf</h3>
+
+  @if ((application?.attachments ?? []).length > 0) {
+  <div class="overflow-x-auto">
+    <!-- Table headers for larger screens -->
+    <div class="hidden md:grid grid-cols-12 gap-4 font-semibold text-gray-600 mb-2 px-2">
+      <div class="col-span-6">Name</div>
+      <div class="col-span-2">Size</div>
+      <div class="col-span-2">Date</div>
+      <div class="col-span-2 text-center">Actions</div>
+    </div>
+
+    <!-- File items -->
+    @for (file of application?.attachments; track file.$id) {
+    <div class="grid grid-cols-1 md:grid-cols-12 gap-2 mb-4 p-2 border-b border-gray-200 items-center">
+      <!-- File name -->
+      <div class="flex items-center gap-2 col-span-1 md:col-span-6">
+        <lucide-angular [img]="getIconForMime(file.mimeType)" class="text-[var(--p-primary-color)]"
+          size="20"></lucide-angular>
+        <span class="truncate">{{ file.name }}</span>
       </div>
-      <h3>45.5 mb</h3>
-      <h3>24 July 2025 7:45 am</h3>
-      <div class="flex gap-4">
-        <lucide-angular [img]="Eye" class="text-[var(--p-primary-color)] cursor-pointer" size="25"></lucide-angular>
-        <lucide-angular [img]="ArrowDownToLine" class="text-[var(--p-primary-color)] cursor-pointer" size="25"></lucide-angular>
+
+      <!-- File size -->
+      <div class="flex md:block col-span-1 md:col-span-2">
+        <span class="text-gray-500 md:hidden mr-2">Size:</span>
+        <span>{{ formatFileSize(file.sizeOriginal) }}</span>
+      </div>
+
+      <!-- Date -->
+      <div class="flex md:block col-span-1 md:col-span-2">
+        <span class="text-gray-500 md:hidden mr-2">Date:</span>
+        <span>{{ formatDate(file.$createdAt) }}</span>
+      </div>
+
+      <!-- Actions -->
+      <div class="flex gap-4 md:justify-center col-span-1 md:col-span-2">
+        <lucide-angular [img]="Eye" class="text-[var(--p-primary-color)] cursor-pointer hover:opacity-80" size="20"
+          (click)="previewFile(file)" />
+        <lucide-angular [img]="ArrowDownToLine" class="text-[var(--p-primary-color)] cursor-pointer hover:opacity-80"
+          size="20" (click)="downloadFile(file)" />
+        <lucide-angular [img]="Trash" class="text-[var(--p-primary-color)] cursor-pointer hover:opacity-80" size="20"
+          (click)="openDeleteDialog('attachment', file.$id)" />
       </div>
     </div>
-    <div class="flex justify-between">
-      <div class="flex gap-2 mb-4">
-        <lucide-angular [img]="FileText" class="text-[var(--p-primary-color)]" size="20"></lucide-angular>
-        <h3>Tata Consultancy Services Offer Letter.pdf</h3>
-      </div>
-      <h3>45.5 mb</h3>
-      <h3>24 July 2025 7:45 am</h3>
-      <div class="flex gap-4">
-        <lucide-angular [img]="Eye" class="text-[var(--p-primary-color)] cursor-pointer" size="25"></lucide-angular>
-        <lucide-angular [img]="ArrowDownToLine" class="text-[var(--p-primary-color)] cursor-pointer" size="25"></lucide-angular>
-      </div>
-    </div>
-    <div class="flex justify-between">
-      <div class="flex gap-2 mb-4">
-        <lucide-angular [img]="FileText" class="text-[var(--p-primary-color)]" size="20"></lucide-angular>
-        <h3>Tata Consultancy Services Offer Letter.pdf</h3>
-      </div>
-      <h3>45.5 mb</h3>
-      <h3>24 July 2025 7:45 am</h3>
-      <div class="flex gap-4">
-        <lucide-angular [img]="Eye" class="text-[var(--p-primary-color)] cursor-pointer" size="25"></lucide-angular>
-        <lucide-angular [img]="ArrowDownToLine" class="text-[var(--p-primary-color)] cursor-pointer" size="25"></lucide-angular>
-      </div>
-    </div>
-    <div class="flex gap-2 mb-4">
-      <lucide-angular [img]="Image" class="text-[var(--p-primary-color)]" size="20"></lucide-angular>
-      <h3>tcs.jpeg</h3>
-    </div>
+    }
   </div>
+  } @else {
+  <p class="text-gray-500">No attachments uploaded.</p>
+  }
 </p-card>
+
+
+
+<app-dialog [visible]="uploadDialogueVisible" title="Upload Attachment" [btnText]="uploading? 'Uploading...' : 'Upload'"
+  (close)="uploadDialogueVisible=false" (submit)="upload()" [btnDisable]="uploading || !selectedFile">
+  <div>
+    <div class="flex gap-4 justify-center items-center m-2 p-4">
+      <p-fileUpload #fu mode="basic" chooseLabel="Choose" chooseIcon="pi pi-upload" name="file" customUpload="true"
+        auto="true" (uploadHandler)="onSelectFile($event)">
+      </p-fileUpload>
+      @if(fileName){
+      <div class="flex justify-center items-center gap-2">
+        <p>{{fileName}}</p>
+        <div (click)="clearFile()">
+          <lucide-angular [img]="X" class="text-[var(--p-primary-color)]" size="20"></lucide-angular>
+        </div>
+
+      </div>
+      }
+    </div>
+    @if(uploading){
+    <div class="mx-2 px-4 py-4">
+      <p-progressbar mode="indeterminate" [style]="{ height: '4px' }" />
+    </div>
+    }
+  </div>
+</app-dialog>
+
+<app-drawer [drawerVisible]="drawerVisible" [applicationForm]="applicationForm" (close)="handleDrawerClose()"
+  (submit)="onSubmit()" title="Edit Application" btnText="Save">
+</app-drawer>
+
+<app-dialog [visible]="deleteDialogVisible"
+  [title]="deleteContext === 'application' ? 'Delete Application' : 'Delete Attachment'" [btnText]="'Delete'"
+  (close)="handleDeleteDialogClose()" (submit)="onDeleteConfirm()">
+  <img src="question.svg" style="height: 200px;" />
+  <div class="flex justify-center items-center mt-4">
+    <h2>
+      Do you want to delete this {{ deleteContext === 'application' ? 'Application' : 'Attachment' }}?
+    </h2>
+  </div>
+</app-dialog>
+
+
+<p-toast [breakpoints]="{ '920px': { width: '90%' } }" />
+}

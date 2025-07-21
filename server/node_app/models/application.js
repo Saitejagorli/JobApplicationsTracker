@@ -13,6 +13,23 @@ const sectionSchema = new mongoose.Schema({
   _id: false,
 });
 
+const attachmentSchema = new mongoose.Schema({
+  $id: String,
+  bucketId: String,
+  $createdAt: String,
+  $updatedAt: String,
+  $permissions: [String],
+  name: String,
+  signature: String,
+  mimeType: String,
+  sizeOriginal: Number,
+  chunksTotal: Number,
+  chunksUploaded: Number,
+}, { _id: false });
+
+
+
+
 const applicationSchema = new mongoose.Schema({
   companyName: {
     type: String,
@@ -83,6 +100,7 @@ const applicationSchema = new mongoose.Schema({
     default: Date.now,
   },
   interviewQuestions: [sectionSchema],
+  attachments:[attachmentSchema],
 });
 
 const Application = mongoose.model("Application", applicationSchema);
