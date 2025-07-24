@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { DialogModule } from 'primeng/dialog';
 
-import { LucideAngularModule, XIcon } from 'lucide-angular';
+import { LucideAngularModule, XIcon, Upload, Trash, Sparkles    } from 'lucide-angular';
 
 import { ButtonModule } from 'primeng/button';
 
@@ -16,6 +16,8 @@ export class DialogComponent {
   @Input({ required: true }) title!: string;
   @Input({ required: true }) btnText!: string;
   @Input() btnDisable : boolean = false;
+  @Input() hasIcon: boolean = false;
+  @Input() icon: string = '';
 
   @Output() close = new EventEmitter<void>();
   @Output() submit = new EventEmitter<void>();

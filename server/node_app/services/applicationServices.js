@@ -60,7 +60,7 @@ const createApplication = async ({
       description: "Processing...", // placeholder
     });
 
-    processJobPostDescription(newApplication._id, jobPostLink);
+    summarizeDescription(newApplication._id, jobPostLink, "");
 
     return newApplication._id;
   } catch (err) {
@@ -84,7 +84,7 @@ const getApplications = async (req) => {
     if (status) {
       query.status = status;
     }
-    const sort = { createdAt: sortOrder === "asc" ? 1 : -1 };
+    const sort = { "statusTimestamps.applied": sortOrder === "asc" ? 1 : -1 };
     const applications = await Application.find(query, {
       companyName: 1,
       role: 1,
@@ -93,7 +93,7 @@ const getApplications = async (req) => {
       location: 1,
       source: 1,
       status: 1,
-      createdAt: 1,
+      "statusTimestamps.applied": 1,
       _id: 1,
     })
       .sort(sort)
@@ -127,8 +127,15 @@ const updateApplication = async (id, updateFields) => {
       updateFields.status = latestStatus;
     }
 
-    if (updateFields.jobPostLink) {
+    let summaryUrl = "";
+    let summaryDesc = "";
+
+    if (updateFields.jobPostLink) summaryUrl = updateFields.jobPostLink;
+    if (updateFields.description) summaryDesc = updateFields.description;
+
+    if (summaryUrl || summaryDesc) {
       updateFields.description = "Processing...";
+      summarizeDescription(id, summaryUrl, summaryDesc);
     }
 
     const application = await Application.findByIdAndUpdate(
@@ -136,10 +143,6 @@ const updateApplication = async (id, updateFields) => {
       { $set: updateFields },
       { new: true, runValidators: true }
     );
-
-    if (updateFields.jobPostLink) {
-      processJobPostDescription(id, updateFields.jobPostLink);
-    }
     return application;
   } catch (err) {
     throw err;
@@ -350,14 +353,23 @@ const getLast6MonthsApplications = async () => {
   return chartData;
 };
 
-const processJobPostDescription = async (id, jobPostLink) => {
+const summarizeDescription = async (id, url = "", description = "") => {
   try {
-    const description = await summarizeJobPost(jobPostLink);
-    await Application.findByIdAndUpdate(id, { description });
+    const response = await summarizeJobPost({ url, description });
+    let updates = { description: response.html, isUrlParsed: false };
+    if (url && response.success) {
+      updates.isUrlParsed = true;
+    }
+    await Application.findByIdAndUpdate(id, updates);
   } catch (err) {
     console.error("❌ Summarization failed", err.message);
     await Application.findByIdAndUpdate(id, {
-      description: "Details Not Found",
+      description: `
+                  <div class="job-summary">
+                    <h1 class="text-2xl font-bold text-red-600">Details Not Found</h1>
+                  </div>
+                  `,
+      isUrlParsed: false,
     });
   }
 };
