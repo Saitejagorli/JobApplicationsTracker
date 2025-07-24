@@ -31,7 +31,7 @@
           <div class="flex justify-between items-center gap-3 text-secondary">
             <div class="flex items-center gap-2">
               <div class="p-2 rounded-sm" style="background-color: #f0ebff;">
-                <lucide-angular [img]="CalendarPlus" style="color: var(--p-primary-color)"></lucide-angular>
+                <lucide-angular [img]="CalendarPlus" style="color: var(--p-primary-color)"  ></lucide-angular>
               </div>
               <h2 class="text-sm md:text-base">Applied This Week</h2>
             </div>
@@ -201,7 +201,7 @@
           </div>
         </td>
         <td>{{ application.role }}</td>
-        <td>{{ application.date | date: 'dd/MM/yyyy' }}</td>
+        <td>{{ application.date | date:  'dd MMM yyyy' }}</td>
         <td>{{ application.location }}</td>
         <td>{{ application.source }}</td>
         <td>

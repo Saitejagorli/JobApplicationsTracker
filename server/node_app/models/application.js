@@ -99,6 +99,10 @@ const applicationSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+  isUrlParsed: {
+    type: Boolean,
+    default: false,
+  },
   interviewQuestions: [sectionSchema],
   attachments:[attachmentSchema],
 });

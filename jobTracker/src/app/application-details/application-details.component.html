@@ -71,6 +71,16 @@
 </p-card>
 
 <p-card styleClass="mx-4 mt-6 md:mx-8 lg:mx-20 p-4">
+  <ng-template #header>
+    <div class="flex justify-between">
+      <h1 class="text-secondary font-semibold text-xl">Description</h1>
+      <div class="flex gap-2">
+        <div class="p-2 rounded-sm bg-[#f0ebff] hover:bg-primary-50" (click)="descriptionDialogVisible=true">
+          <lucide-angular [img]="Pencil" class="text-[var(--p-primary-color)]" size="16"></lucide-angular>
+        </div>
+      </div>
+    </div>
+  </ng-template>
   <ng-template #content>
     @if(application?.description === 'Processing...'){
     <p-skeleton styleClass="mb-2" borderRadius="16px" />
@@ -106,7 +116,7 @@
         {{event.status}}
       </ng-template>
       <ng-template #opposite let-event>
-        {{event.date | date: 'dd/MM/yyyy'}}
+        {{event.date | date:  'dd MMM yyyy'}}
       </ng-template>
 
     </p-timeline>
@@ -289,6 +299,16 @@
     </h2>
   </div>
 </app-dialog>
+
+<form [formGroup]="descriptionForm">
+  <app-dialog [visible]="descriptionDialogVisible" title="Add Description" btnText="Summarize" [hasIcon]="true"
+    icon="sparkles" (close)="descriptionDialogVisible = false" (submit)="onDescriptionSubmit()"
+    [btnDisable]="!descriptionForm.get('description')?.value || (descriptionForm.get('description')?.value?.length ?? 0) < 300">
+    <textarea formControlName="description" rows="10" cols="30" pTextarea style="min-height: 240px;"
+      class="my-2 mx-4"></textarea>
+  </app-dialog>
+</form>
+
 
 
 <p-toast [breakpoints]="{ '920px': { width: '90%' } }" />

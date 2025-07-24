@@ -17,7 +17,7 @@
                 (click)="onClose()">
                 Cancel
             </button>
-            <p-button [style]="{'padding':'5px 8px'}" (onClick)="onSubmit()" [disabled]="btnDisable" >{{btnText}}</p-button>
+            <p-button [icon]="hasIcon ? `pi pi-${icon}`:''" [label]="btnText" [style]="{'padding':'5px 8px'}" (onClick)="onSubmit()" [disabled]="btnDisable" ></p-button>
         </div>
     </ng-template>
 </p-dialog>

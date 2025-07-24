@@ -428,7 +428,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
           logo: application.logo,
           domain: application.domain,
           role: application.role,
-          date: application.createdAt,
+          date: application.statusTimestamps.applied,
           location: application.location,
           source: application.source,
           status: application.status,

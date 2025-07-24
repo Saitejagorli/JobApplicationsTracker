@@ -22,6 +22,7 @@ import { InputTextModule } from 'primeng/inputtext';
 import { ButtonModule } from 'primeng/button';
 import { FileUploadModule } from 'primeng/fileupload';
 import { ProgressBarModule } from 'primeng/progressbar';
+import { TextareaModule } from 'primeng/textarea';
 
 import { MessageService } from 'primeng/api';
 
@@ -63,6 +64,7 @@ interface Application {
   description?: string;
   createdAt: string;
   status: string;
+  isUrlParsed?: boolean;
   attachments?: Attachment[];
 }
 
@@ -111,6 +113,7 @@ interface Question {
     FileUploadModule,
     LoadingSpinnerComponent,
     ProgressBarModule,
+    TextareaModule,
   ],
   providers: [MessageService],
   templateUrl: './application-details.component.html',
@@ -147,6 +150,11 @@ export class ApplicationDetailsComponent implements OnInit {
   uploading: boolean = false;
 
   attachmentIdToDelete: string | null = null;
+
+  descriptionDialogVisible: boolean = false;
+  descriptionForm = this.formBuilder.group({
+    description: ['', Validators.required],
+  });
 
   applicationForm!: FormGroup;
   questionsForm = this.formBuilder.group({
@@ -279,6 +287,7 @@ export class ApplicationDetailsComponent implements OnInit {
         next: (res) => {
           if (this.application) {
             this.application.description = res.data.description;
+            this.application.isUrlParsed = res.data.isUrlParsed;
           }
         },
         error: (err) => {
@@ -449,6 +458,50 @@ export class ApplicationDetailsComponent implements OnInit {
       });
     }
   }
+
+  onDescriptionSubmit() {
+    if (this.descriptionForm.invalid) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Description is required',
+      });
+      return;
+    }
+
+    const description = this.descriptionForm.value.description;
+
+    this.appService
+      .updateApplication(this.id, { description })
+      .pipe(
+        finalize(() => {
+          this.descriptionDialogVisible = false;
+          this.descriptionForm.reset();
+          setTimeout(() => {
+            this.getApplication();
+          }, 800);
+        })
+      )
+      .subscribe({
+        next: (res) => {
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Success',
+            detail: 'Summarization in progress, please wait...',
+          });
+          this.pollApplication();
+          this.descriptionForm.reset();
+        },
+        error: (err) => {
+          console.error(err);
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Failed to update description',
+          });
+        },
+      });
+  } 
 
   get sections(): FormArray {
     return this.questionsForm.get('sections') as FormArray;
@@ -630,7 +683,7 @@ export class ApplicationDetailsComponent implements OnInit {
 
       // Step 3: Refresh UI
       setTimeout(() => {
-        this.getApplication();    
+        this.getApplication();
       }, 800);
 
       // Step 4: Show toast
