@@ -29,6 +29,18 @@ export class ApplicationService implements Application {
       updateFields
     );
   }
+
+  updateAttachments(id: string, attachment: any): Observable<any> {
+    return this.http.post(
+      `${environment.BASE_API}/applications/${id}/attachments`,
+      attachment
+    );
+  }
+
+  deleteAttachment(id: string, fileId: string): Observable<any> {
+    return this.http.delete(`${environment.BASE_API}/applications/${id}/attachments/${fileId}`);
+  }
+
   createApplication(data: any): Observable<any> {
     return this.http.post(`${environment.BASE_API}/applications`, data);
   }

@@ -1,7 +1,22 @@
 import { Application } from "../models/application.js";
 import { summarizeJobPost } from "./summarizationService.js";
+
 import mongoose from "mongoose";
 const { ObjectId } = mongoose.Types;
+
+import { Client, Storage } from "appwrite";
+
+import dotenv from "dotenv";
+
+dotenv.config();
+
+const client = new Client()
+  .setEndpoint(process.env.APPWRITE_ENDPOINT)
+  .setProject(process.env.APPWRITE_PROJECT_ID);
+
+const storage = new Storage(client, {
+  apiKey: process.env.APPWRITE_API_KEY,
+});
 
 const getLatestStatus = (timestamps) => {
   const statusOrder = ["applied", "interviewing", "offered", "rejected"];
@@ -131,10 +146,57 @@ const updateApplication = async (id, updateFields) => {
   }
 };
 
+const addAttachment = async (id, attachment) => {
+  try {
+    const application = await Application.findByIdAndUpdate(
+      id,
+      { $push: { attachments: attachment } },
+      { new: true, runValidators: true }
+    );
+    return application;
+  } catch (err) {
+    throw err;
+  }
+};
+
+const deleteAttachment = async (applicationId, fileId) => {
+  try {
+    const application = await Application.findByIdAndUpdate(
+      applicationId,
+      { $pull: { attachments: { $id: fileId } } },
+      { new: true, runValidators: true }
+    );
+    return application;
+  } catch (err) {
+    throw err;
+  }
+};
+
 const deleteApplication = async (id) => {
   try {
-    const application = await Application.deleteOne({ _id: new ObjectId(id) });
-    return application;
+    const app = await Application.findById(id);
+    if (!app) throw new Error("Application not found");
+
+    const attachments = app.attachments || [];
+
+    for (const attachment of attachments) {
+      if (attachment?.$id) {
+        try {
+          await storage.deleteFile(
+            process.env.ATTACHMENTS_BUCKET_ID,
+            attachment.$id
+          );
+        } catch (err) {
+          console.warn(
+            `⚠️ Failed to delete attachment ${attachment.$id}:`,
+            err.message
+          );
+        }
+      }
+    }
+
+    const result = await Application.deleteOne({ _id: new ObjectId(id) });
+    return result;
   } catch (err) {
     throw err;
   }
@@ -308,4 +370,6 @@ export {
   getLast6MonthsApplications,
   updateApplication,
   deleteApplication,
+  addAttachment,
+  deleteAttachment,
 };

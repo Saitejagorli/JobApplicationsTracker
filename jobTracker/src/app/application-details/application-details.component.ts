@@ -20,6 +20,8 @@ import { SkeletonModule } from 'primeng/skeleton';
 import { AccordionModule } from 'primeng/accordion';
 import { InputTextModule } from 'primeng/inputtext';
 import { ButtonModule } from 'primeng/button';
+import { FileUploadModule } from 'primeng/fileupload';
+import { ProgressBarModule } from 'primeng/progressbar';
 
 import { MessageService } from 'primeng/api';
 
@@ -34,14 +36,17 @@ import {
   Image,
   Eye,
   ArrowDownToLine,
+  X,
 } from 'lucide-angular';
 
-import { finalize, switchMap, takeWhile, timer } from 'rxjs';
+import { finalize, lastValueFrom, switchMap, takeWhile, timer } from 'rxjs';
 
 import { ApplicationService } from '../../services/application.service';
 import { DrawerComponent } from '../drawer/drawer.component';
 import { DialogComponent } from '../dialog/dialog.component';
 import { LoadingSpinnerComponent } from '../loading-spinner/loading-spinner.component';
+import { AppwriteService } from '../../services/appwrite.service';
+import { environment } from '../../environments/environment';
 
 interface Application {
   id: string;
@@ -58,6 +63,21 @@ interface Application {
   description?: string;
   createdAt: string;
   status: string;
+  attachments?: Attachment[];
+}
+
+interface Attachment {
+  $id: string;
+  bucketId: string;
+  $createdAt: string;
+  $updatedAt: string;
+  $permissions: string[];
+  name: string;
+  signature: string;
+  mimeType: string;
+  sizeOriginal: number;
+  chunksTotal: number;
+  chunksUploaded: number;
 }
 
 interface Section {
@@ -88,7 +108,9 @@ interface Question {
     AccordionModule,
     InputTextModule,
     ButtonModule,
+    FileUploadModule,
     LoadingSpinnerComponent,
+    ProgressBarModule,
   ],
   providers: [MessageService],
   templateUrl: './application-details.component.html',
@@ -105,6 +127,7 @@ export class ApplicationDetailsComponent implements OnInit {
   readonly Image = Image;
   readonly Eye = Eye;
   readonly ArrowDownToLine = ArrowDownToLine;
+  readonly X = X;
 
   formBuilder = inject(FormBuilder);
 
@@ -114,8 +137,16 @@ export class ApplicationDetailsComponent implements OnInit {
 
   isLoading: boolean = false;
   drawerVisible: boolean = false;
-  deleteDialogVisible: boolean = false;
+  deleteDialogVisible = false;
+  deleteContext: 'application' | 'attachment' | null = null;
   questionsEditable: boolean = false;
+
+  uploadDialogueVisible: boolean = false;
+  selectedFile: File | null = null;
+  fileName: string = '';
+  uploading: boolean = false;
+
+  attachmentIdToDelete: string | null = null;
 
   applicationForm!: FormGroup;
   questionsForm = this.formBuilder.group({
@@ -126,6 +157,7 @@ export class ApplicationDetailsComponent implements OnInit {
     private appService: ApplicationService,
     private route: ActivatedRoute,
     private router: Router,
+    private appwriteService: AppwriteService,
     private messageService: MessageService
   ) {
     this.id = this.route.snapshot.paramMap.get('id') || '';
@@ -293,15 +325,39 @@ export class ApplicationDetailsComponent implements OnInit {
     this.initApplicationForm();
   }
 
+  openDeleteDialog(
+    context: 'application' | 'attachment',
+    attachmentId?: string
+  ) {
+    this.deleteContext = context;
+    this.attachmentIdToDelete = attachmentId || null;
+    this.deleteDialogVisible = true;
+  }
+
   handleDeleteDialogClose() {
     this.deleteDialogVisible = false;
+    this.deleteContext = null;
+    this.attachmentIdToDelete = null;
   }
 
   toggleQuestions() {
     this.questionsEditable = !this.questionsEditable;
   }
 
-  onDeleteConfirm(): void {
+  onDeleteConfirm() {
+    if (this.deleteContext === 'application') {
+      this.deleteApplication();
+    } else if (
+      this.deleteContext === 'attachment' &&
+      this.attachmentIdToDelete
+    ) {
+      this.deleteFile(this.attachmentIdToDelete);
+    }
+
+    this.handleDeleteDialogClose();
+  }
+
+  deleteApplication() {
     this.appService
       .deleteApplication(this.id)
       .pipe(
@@ -365,7 +421,7 @@ export class ApplicationDetailsComponent implements OnInit {
             setTimeout(() => {
               this.getApplication();
               this.pollApplication();
-            }, 1000);
+            }, 800);
           })
         )
         .subscribe({
@@ -455,5 +511,143 @@ export class ApplicationDetailsComponent implements OnInit {
           });
         },
       });
+  }
+
+  formatFileSize(bytes: number): string {
+    return (bytes / (1024 * 1024)).toFixed(1) + ' mb';
+  }
+
+  formatDate(isoDate: string): string {
+    return new Date(isoDate).toLocaleString('en-IN', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  }
+
+  getIconForMime(mimeType: string): any {
+    if (mimeType.startsWith('image/')) return this.Image;
+    return this.FileText;
+  }
+
+  previewFile(file: any) {
+    const url = `${environment.APPWRITE_ENDPOINT}/storage/buckets/${file.bucketId}/files/${file.$id}/view?project=${environment.APPWRITE_PROJECT_ID}&mode=admin`;
+    console.log('view URL:', url);
+    window.open(url, '_blank');
+  }
+
+  downloadFile(file: any) {
+    const url = `${environment.APPWRITE_ENDPOINT}/storage/buckets/${file.bucketId}/files/${file.$id}/download?project=${environment.APPWRITE_PROJECT_ID}&mode=admin`;
+    console.log('Download URL:', url);
+    window.open(url, '_blank');
+  }
+
+  onSelectFile(event: any) {
+    const file = event.files[0];
+    this.selectedFile = file;
+    this.fileName = file?.name || '';
+    console.log('Selected file:', file);
+  }
+
+  clearFile() {
+    this.selectedFile = null;
+    this.fileName = '';
+  }
+
+  async upload() {
+    if (!this.selectedFile) return;
+
+    try {
+      this.uploading = true;
+
+      const response = await this.appwriteService.uploadFile(
+        this.selectedFile,
+        environment.ATTACHMENTS_BUCKET_ID
+      );
+
+      console.log('Upload response:', response);
+
+      this.appService.updateAttachments(this.id, response).subscribe({
+        next: (res) => {
+          console.log('Attachment updated:', res);
+
+          // ✅ Show success message after update
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Success',
+            detail: 'Uploaded Successfully',
+            life: 5000,
+          });
+
+          // ✅ Now refresh after update is successful
+          setTimeout(() => {
+            this.getApplication();
+          }, 800);
+        },
+        error: (err) => {
+          console.error(err);
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Failed to update application',
+          });
+        },
+        complete: () => {
+          this.uploadDialogueVisible = false;
+          this.selectedFile = null;
+          this.fileName = '';
+          this.uploading = false;
+        },
+      });
+    } catch (error) {
+      console.error(error);
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Failed to upload file',
+      });
+
+      // Cleanup even on error
+      this.uploadDialogueVisible = false;
+      this.selectedFile = null;
+      this.fileName = '';
+      this.uploading = false;
+    }
+  }
+
+  async deleteFile(fileId: string) {
+    try {
+      // Step 1: Remove from DB (MongoDB)
+      await lastValueFrom(this.appService.deleteAttachment(this.id, fileId));
+
+      // Step 2: Delete from Appwrite storage
+      await this.appwriteService.deleteFile(
+        environment.ATTACHMENTS_BUCKET_ID,
+        fileId
+      );
+
+      // Step 3: Refresh UI
+      setTimeout(() => {
+        this.getApplication();    
+      }, 800);
+
+      // Step 4: Show toast
+      this.messageService.add({
+        severity: 'success',
+        summary: 'Deleted',
+        detail: 'Attachment deleted successfully',
+      });
+    } catch (error) {
+      console.error('Error deleting attachment:', error);
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Failed to delete attachment',
+      });
+    } finally {
+      // this.uploading = false;
+    }
   }
 }

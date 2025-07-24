@@ -9,6 +9,8 @@ import {
   getChartData,
   getMetrics,
   deleteApplicationByID,
+  updateAttachment,
+  deleteApplicationAttachment,
 } from "../controllers/applicationController.js";
 
 router.get("/", getAllApplications);
@@ -17,5 +19,7 @@ router.get("/metrics", getMetrics);
 router.get("/chart", getChartData);
 router.get("/:id", getApplicationByID);
 router.patch("/:id", updateApplicationByID);
+router.post("/:id/attachments", updateAttachment);
+router.delete("/:id/attachments/:attachmentId", deleteApplicationAttachment);
 router.delete("/:id", deleteApplicationByID);
 export { router as applicationRoutes };

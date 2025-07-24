@@ -9,6 +9,8 @@ import {
   getLast6MonthsApplications,
   updateApplication,
   deleteApplication,
+  addAttachment,
+  deleteAttachment,
 } from "../services/applicationServices.js";
 
 const createNewApplication = async (req, res) => {
@@ -82,6 +84,47 @@ const updateApplicationByID = async (req, res) => {
   }
 };
 
+const updateAttachment = async (req, res) => {
+  const id = req.params.id;
+  if (!ObjectId.isValid(id)) {
+    return res.status(400).json({ message: "Invalid ID format" });
+  }
+  const attachment = req.body;
+  if (!attachment || Object.keys(attachment).length === 0) {
+    return res.status(400).json({ message: "No attachment data provided" });
+  }
+  try {
+    const updatedApplication = await addAttachment(id, attachment);
+    if (!updatedApplication) {
+      return res.status(404).json({ message: "Application not found" });
+    }
+    res.status(200).json({ message: "Attachment added successfully" });
+  } catch (err) {
+    console.error("Error occured while adding attachment:", err);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+const deleteApplicationAttachment = async (req, res) => {
+  const id = req.params.id;
+  const attachmentId = req.params.attachmentId;
+
+  if (!ObjectId.isValid(id)) {
+    return res.status(400).json({ message: "Invalid ID format" });
+  }
+
+  try {
+    const updatedApplication = await deleteAttachment(id, attachmentId);
+    if (!updatedApplication) {
+      return res.status(404).json({ message: "Application not found" });
+    }
+    res.status(200).json({ message: "Attachment deleted successfully" });
+  } catch (err) {
+    console.error("Error occured while deleting attachment:", err);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};  
+
 const deleteApplicationByID = async (req, res) => {
   try {
     const id = req.params.id;
@@ -126,6 +169,8 @@ export {
   getApplicationByID,
   updateApplicationByID,
   deleteApplicationByID,
+  updateAttachment,
+  deleteApplicationAttachment,
   getMetrics,
   getChartData,
 };
