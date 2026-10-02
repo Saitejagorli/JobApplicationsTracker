@@ -10,7 +10,10 @@ import {
   updateApplication,
   deleteApplication,
   addAttachment,
+  updateAttachmentStatus,
   deleteAttachment,
+  getAttachmentViewUrl,
+  getAttachmentDownloadUrl,
 } from "../services/applicationServices.js";
 
 const createNewApplication = async (req, res) => {
@@ -94,13 +97,37 @@ const updateAttachment = async (req, res) => {
     return res.status(400).json({ message: "No attachment data provided" });
   }
   try {
-    const updatedApplication = await addAttachment(id, attachment);
-    if (!updatedApplication) {
-      return res.status(404).json({ message: "Application not found" });
-    }
-    res.status(200).json({ message: "Attachment added successfully" });
+    const attachmentData = await addAttachment(id, attachment);
+    res.status(200).json({
+      message: "Upload URL generated successfully",
+      data: attachmentData,
+    });
   } catch (err) {
     console.error("Error occured while adding attachment:", err);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+const markAttachmentAsUploaded = async (req, res) => {
+  const id = req.params.id;
+  const attachmentId = req.params.attachmentId;
+
+  if (!ObjectId.isValid(id) || !ObjectId.isValid(attachmentId)) {
+    return res.status(400).json({ message: "Invalid ID format" });
+  }
+
+  try {
+    const updatedApplication = await updateAttachmentStatus(id, attachmentId);
+    if (!updatedApplication) {
+      return res
+        .status(404)
+        .json({ message: "Application or attachment not found" });
+    }
+    res
+      .status(200)
+      .json({ message: "Attachment marked as uploaded successfully" });
+  } catch (err) {
+    console.error("Error occured while marking attachment as uploaded:", err);
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
@@ -109,7 +136,7 @@ const deleteApplicationAttachment = async (req, res) => {
   const id = req.params.id;
   const attachmentId = req.params.attachmentId;
 
-  if (!ObjectId.isValid(id)) {
+  if (!ObjectId.isValid(id) || !ObjectId.isValid(attachmentId)) {
     return res.status(400).json({ message: "Invalid ID format" });
   }
 
@@ -123,7 +150,47 @@ const deleteApplicationAttachment = async (req, res) => {
     console.error("Error occured while deleting attachment:", err);
     res.status(500).json({ message: "Internal Server Error" });
   }
-};  
+};
+
+const getViewUrlForAttachment = async (req, res) => {
+  const id = req.params.id;
+  const attachmentId = req.params.attachmentId;
+
+  if (!ObjectId.isValid(id) || !ObjectId.isValid(attachmentId)) {
+    return res.status(400).json({ message: "Invalid ID format" });
+  }
+
+  try {
+    const viewUrl = await getAttachmentViewUrl(id, attachmentId);
+    res.status(200).json({ data: { viewUrl } });
+  } catch (err) {
+    console.error(
+      "Error occurred while fetching view URL for attachment:",
+      err,
+    );
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+const getDownloadUrlForAttachment = async (req, res) => {
+  const id = req.params.id;
+  const attachmentId = req.params.attachmentId;
+
+  if (!ObjectId.isValid(id) || !ObjectId.isValid(attachmentId)) {
+    return res.status(400).json({ message: "Invalid ID format" });
+  }
+
+  try {
+    const downloadUrl = await getAttachmentDownloadUrl(id, attachmentId);
+    res.status(200).json({ data: { downloadUrl } });
+  } catch (err) {
+    console.error(
+      "Error occurred while fetching download URL for attachment:",
+      err,
+    );
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
 
 const deleteApplicationByID = async (req, res) => {
   try {
@@ -170,7 +237,10 @@ export {
   updateApplicationByID,
   deleteApplicationByID,
   updateAttachment,
+  markAttachmentAsUploaded,
   deleteApplicationAttachment,
+  getViewUrlForAttachment,
+  getDownloadUrlForAttachment,
   getMetrics,
   getChartData,
 };

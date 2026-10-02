@@ -164,6 +164,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.initRouteParams();
     this.initDashboard();
     this.initTableSearch();
+    // Remove theme observer and dark mode logic
   }
 
   ngOnDestroy() {
@@ -217,10 +218,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
           {
             data: [applied, interviewsScheduled, rejected, offersReceived],
             backgroundColor: [
-              documentStyle.getPropertyValue('--p-indigo-600'),
-              documentStyle.getPropertyValue('--p-indigo-400'),
-              documentStyle.getPropertyValue('--p-indigo-300'),
-              documentStyle.getPropertyValue('--p-indigo-200'),
+              documentStyle.getPropertyValue('--p-primary-600'),
+              documentStyle.getPropertyValue('--p-primary-400'),
+              documentStyle.getPropertyValue('--p-primary-300'),
+              documentStyle.getPropertyValue('--p-primary-200'),
             ],
             // hoverBackgroundColor:[documentStyle.getPropertyValue('--p-indigo-300'),documentStyle.getPropertyValue('--p-indigo-200'),documentStyle.getPropertyValue('--p-indigo-100'),documentStyle.getPropertyValue('--p-indigo-500')]
             // backgroundColor: [documentStyle.getPropertyValue('--p-teal-500'), documentStyle.getPropertyValue('--p-rose-500'), documentStyle.getPropertyValue('--p-cyan-500'),documentStyle.getPropertyValue('--p-gray-500')],
@@ -271,7 +272,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
           position: 'bottom',
           labels: {
             usePointStyle: true,
-            color: textColor,
+            color: '#222', // Always use dark text for light mode
           },
         },
       },
@@ -288,7 +289,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
       plugins: {
         legend: {
           labels: {
-            color: textColor,
+            color: '#222', // Always use dark text for light mode
           },
         },
       },

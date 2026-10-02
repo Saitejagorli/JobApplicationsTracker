@@ -4,7 +4,13 @@ import { summarizeJobPost } from "./summarizationService.js";
 import mongoose from "mongoose";
 const { ObjectId } = mongoose.Types;
 
-import { Client, Storage } from "appwrite";
+import { Client, Storage } from "node-appwrite";
+import {
+  generateUploadUrl,
+  deleteFile,
+  generateViewUrl,
+  generateDownloadUrl,
+} from "../config/cloud.js";
 
 import dotenv from "dotenv";
 
@@ -141,7 +147,7 @@ const updateApplication = async (id, updateFields) => {
     const application = await Application.findByIdAndUpdate(
       id,
       { $set: updateFields },
-      { new: true, runValidators: true }
+      { new: true, runValidators: true },
     );
     return application;
   } catch (err) {
@@ -149,27 +155,115 @@ const updateApplication = async (id, updateFields) => {
   }
 };
 
-const addAttachment = async (id, attachment) => {
+const addAttachment = async (applicationId, attachment) => {
+  const { fileName, contentType, size } = attachment;
+  const objectKey = `${applicationId}/${Date.now()}_${fileName}`;
   try {
+    const uploadUrl = await generateUploadUrl(objectKey, contentType);
     const application = await Application.findByIdAndUpdate(
-      id,
-      { $push: { attachments: attachment } },
-      { new: true, runValidators: true }
+      applicationId,
+      {
+        $push: {
+          attachments: {
+            fileName: fileName,
+            contentType: contentType,
+            size: size,
+            objectKey: objectKey,
+            status: "PENDING",
+          },
+        },
+      },
+      { new: true, runValidators: true },
     );
-    return application;
+    return {
+      attachmentId:
+        application.attachments[application.attachments.length - 1]._id,
+      uploadUrl,
+    };
   } catch (err) {
     throw err;
   }
 };
 
-const deleteAttachment = async (applicationId, fileId) => {
+const updateAttachmentStatus = async (applicationId, attachmentId) => {
   try {
     const application = await Application.findByIdAndUpdate(
       applicationId,
-      { $pull: { attachments: { $id: fileId } } },
-      { new: true, runValidators: true }
+      {
+        $set: {
+          "attachments.$[attachment].status": "UPLOADED",
+        },
+      },
+      {
+        arrayFilters: [{ "attachment._id": attachmentId }],
+        new: true,
+        runValidators: true,
+      },
     );
     return application;
+  } catch (err) {
+    throw err;
+  }
+};
+
+const deleteAttachment = async (applicationId, attachmentId) => {
+  try {
+    const objectKey = await Application.findOne(
+      { _id: applicationId },
+      { attachments: { $elemMatch: { _id: attachmentId } } },
+    ).then((app) => app?.attachments[0]?.objectKey);
+
+    if (!objectKey) {
+      throw new Error("Attachment not found");
+    }
+
+    console.info("Deleting attachment with objectKey:", objectKey);
+
+    await deleteFile(objectKey);
+
+    const application = await Application.findByIdAndUpdate(
+      applicationId,
+      {
+        $pull: {
+          attachments: { _id: attachmentId },
+        },
+      },
+      {
+        new: true,
+        runValidators: true,
+      },
+    );
+
+    return application;
+  } catch (err) {
+    throw err;
+  }
+};
+
+const getAttachmentViewUrl = async (applicationId, attachmentId) => {
+  try {
+    const objectKey = await Application.findOne(
+      { _id: applicationId },
+      { attachments: { $elemMatch: { _id: attachmentId } } },
+    ).then((app) => app?.attachments[0]?.objectKey);
+    return await generateViewUrl(objectKey);
+  } catch (err) {
+    throw err;
+  }
+};
+
+const getAttachmentDownloadUrl = async (applicationId, attachmentId) => {
+  try {
+    const attachment = await Application.findOne(
+      { _id: applicationId },
+      { attachments: { $elemMatch: { _id: attachmentId } } },
+    ).then((app) => app?.attachments[0]);
+
+    if (!attachment) {
+      throw new Error("Attachment not found");
+    }
+
+    return await generateDownloadUrl(attachment.objectKey, attachment.fileName);
   } catch (err) {
     throw err;
   }
@@ -183,19 +277,7 @@ const deleteApplication = async (id) => {
     const attachments = app.attachments || [];
 
     for (const attachment of attachments) {
-      if (attachment?.$id) {
-        try {
-          await storage.deleteFile(
-            process.env.ATTACHMENTS_BUCKET_ID,
-            attachment.$id
-          );
-        } catch (err) {
-          console.warn(
-            `⚠️ Failed to delete attachment ${attachment.$id}:`,
-            err.message
-          );
-        }
-      }
+      await deleteFile(attachment.objectKey);
     }
 
     const result = await Application.deleteOne({ _id: new ObjectId(id) });
@@ -240,7 +322,7 @@ const getApplicationMetrics = async () => {
         ? Math.round(
             ((offersReceived + interviewsScheduled + rejected) /
               totalApplications) *
-              100
+              100,
           )
         : 0;
 
@@ -340,7 +422,7 @@ const getLast6MonthsApplications = async () => {
     const month = currentDate.getMonth() + 1;
 
     const entry = rawData.find(
-      (item) => item._id.year === year && item._id.month === month
+      (item) => item._id.year === year && item._id.month === month,
     );
 
     chartData.push({
@@ -384,4 +466,7 @@ export {
   deleteApplication,
   addAttachment,
   deleteAttachment,
+  updateAttachmentStatus,
+  getAttachmentViewUrl,
+  getAttachmentDownloadUrl,
 };

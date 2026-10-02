@@ -112,7 +112,7 @@ async function summarizeJobPost({ url = "", description = "" }) {
                     `;
 
     // Get Gemini model
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" }); // You can also use "gemini-pro"
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" }); // You can also use "gemini-pro"
 
     // Generate content
     const result = await model.generateContent(prompt);

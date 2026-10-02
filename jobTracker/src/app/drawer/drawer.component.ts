@@ -9,22 +9,23 @@ import {
   ViewChild,
 } from '@angular/core';
 
-import { DrawerModule } from 'primeng/drawer';
 import { AutoCompleteModule } from 'primeng/autocomplete';
 import { ButtonModule } from 'primeng/button';
+import { DatePickerModule } from 'primeng/datepicker';
+import { DrawerModule } from 'primeng/drawer';
 import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
 import { InputTextModule } from 'primeng/inputtext';
-import { DatePickerModule } from 'primeng/datepicker';
 import { SelectModule } from 'primeng/select';
 
 import { LucideAngularModule, XIcon } from 'lucide-angular';
 
+import { environment } from '../../environments/environment';
+
 import {
-  FormGroup,
   FormBuilder,
-  ReactiveFormsModule,
-  Validators,
+  FormGroup,
+  ReactiveFormsModule
 } from '@angular/forms';
 import {
   debounceTime,
@@ -181,6 +182,9 @@ export class DrawerComponent implements OnInit, OnDestroy {
       )
       .subscribe((data) => {
         this.filteredCompanies = data;
+        for (let company of this.filteredCompanies) {
+          company.logo = `https://img.logo.dev/${company.domain}?token=${environment.LOGO_API_KEY}`;
+        }
       });
   }
 
@@ -195,7 +199,7 @@ export class DrawerComponent implements OnInit, OnDestroy {
     this.applicationForm.patchValue({
       companyName: event.value.name,
       domain: event.value.domain,
-      logo: event.value.logo,
+      logo:`https://img.logo.dev/${event.value.domain}?token=${environment.LOGO_API_KEY}`,
     });
   }
 
