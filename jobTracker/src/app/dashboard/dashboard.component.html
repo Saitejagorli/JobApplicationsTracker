@@ -20,9 +20,11 @@
         <div class="space-y-3 flex flex-col justify-center">
           <div class="flex justify-between items-center gap-3 text-secondary">
             <div class="flex items-center gap-2">
-              <div class="p-2 rounded-sm" style="background-color: #f0ebff;">
-                <lucide-angular [img]="ClipboardList" style="color: var(--p-primary-color)"></lucide-angular>
+              <div class="p-2 rounded-sm group transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]">
+                <lucide-angular [img]="ClipboardList"
+                  class="text-[color:var(--p-primary-color)] group-hover:scale-[1.08] group-hover:-translate-y-0.5 transition-transform duration-300"></lucide-angular>
               </div>
+
               <h2 class="text-sm md:text-base">Total Applications</h2>
             </div>
             <div>{{applicationMetrics?.totalApplications}}</div>
@@ -30,8 +32,9 @@
 
           <div class="flex justify-between items-center gap-3 text-secondary">
             <div class="flex items-center gap-2">
-              <div class="p-2 rounded-sm" style="background-color: #f0ebff;">
-                <lucide-angular [img]="CalendarPlus" style="color: var(--p-primary-color)"  ></lucide-angular>
+              <div class="p-2 rounded-sm group transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]">
+                <lucide-angular [img]="CalendarPlus"
+                  class="text-[color:var(--p-primary-color)] group-hover:scale-[1.08] group-hover:-translate-y-0.5 transition-transform duration-300"></lucide-angular>
               </div>
               <h2 class="text-sm md:text-base">Applied This Week</h2>
             </div>
@@ -40,8 +43,9 @@
 
           <div class="flex justify-between items-center gap-3 text-secondary">
             <div class="flex items-center gap-2">
-              <div class="p-2 rounded-sm" style="background-color: #f0ebff;">
-                <lucide-angular [img]="BadgeCheck" style="color: var(--p-primary-color)"></lucide-angular>
+              <div class="p-2 rounded-sm group transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]">
+                <lucide-angular [img]="BadgeCheck"
+                  class="text-[color:var(--p-primary-color)] group-hover:scale-[1.08] group-hover:-translate-y-0.5 transition-transform duration-300"></lucide-angular>
               </div>
               <h2 class="text-sm md:text-base">Offers Received</h2>
             </div>
@@ -50,8 +54,9 @@
 
           <div class="flex justify-between items-center gap-3 text-secondary">
             <div class="flex items-center gap-2">
-              <div class="p-2 rounded-sm" style="background-color: #f0ebff;">
-                <lucide-angular [img]="CalendarClock" style="color: var(--p-primary-color)"></lucide-angular>
+              <div class="p-2 rounded-sm group transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]">
+                <lucide-angular [img]="CalendarClock"
+                  class="text-[color:var(--p-primary-color)] group-hover:scale-[1.08] group-hover:-translate-y-0.5 transition-transform duration-300"></lucide-angular>
               </div>
               <h2 class="text-sm md:text-base">Interview Scheduled</h2>
             </div>
@@ -63,8 +68,9 @@
         <div class="space-y-3 flex flex-col justify-center">
           <div class="flex justify-between items-center gap-3 text-secondary">
             <div class="flex items-center gap-2">
-              <div class="p-2 rounded-sm" style="background-color: #f0ebff;">
-                <lucide-angular [img]="MailCheck" style="color: var(--p-primary-color)"></lucide-angular>
+              <div class="p-2 rounded-sm group transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]">
+                <lucide-angular [img]="MailCheck"
+                  class="text-[color:var(--p-primary-color)] group-hover:scale-[1.08] group-hover:-translate-y-0.5 transition-transform duration-300"></lucide-angular>
               </div>
               <h2 class="text-sm md:text-base">Response Rate</h2>
             </div>
@@ -73,8 +79,9 @@
 
           <div class="flex justify-between items-center gap-3 text-secondary">
             <div class="flex items-center gap-2">
-              <div class="p-2 rounded-sm" style="background-color: #f0ebff;">
-                <lucide-angular [img]="TrendingUp" style="color: var(--p-primary-color)"></lucide-angular>
+              <div class="p-2 rounded-sm group transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]">
+                <lucide-angular [img]="TrendingUp"
+                  class="text-[color:var(--p-primary-color)] group-hover:scale-[1.08] group-hover:-translate-y-0.5 transition-transform duration-300"></lucide-angular>
               </div>
               <h2 class="text-sm md:text-base">Conversion Rate</h2>
             </div>
@@ -83,8 +90,9 @@
 
           <div class="flex justify-between items-center gap-3 text-secondary">
             <div class="flex items-center gap-2">
-              <div class="p-2 rounded-sm" style="background-color: #f0ebff;">
-                <lucide-angular [img]="TrendingDown" style="color: var(--p-primary-color)"></lucide-angular>
+              <div class="p-2 rounded-sm group transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]">
+                <lucide-angular [img]="TrendingDown"
+                  class="text-[color:var(--p-primary-color)] group-hover:scale-[1.08] group-hover:-translate-y-0.5 transition-transform duration-300"></lucide-angular>
               </div>
               <h2 class="text-sm md:text-base">Rejection Rate</h2>
             </div>
@@ -93,8 +101,9 @@
 
           <div class="flex justify-between items-center gap-3 text-secondary">
             <div class="flex items-center gap-2">
-              <div class="p-2 rounded-sm" style="background-color: #f0ebff;">
-                <lucide-angular [img]="Ghost" style="color: var(--p-primary-color)"></lucide-angular>
+              <div class="p-2 rounded-sm group transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]">
+                <lucide-angular [img]="Ghost"
+                  class="text-[color:var(--p-primary-color)] group-hover:scale-[1.08] group-hover:-translate-y-0.5 transition-transform duration-300"></lucide-angular>
               </div>
               <h2 class="text-sm md:text-base">Ghosted Rate</h2>
             </div>
@@ -201,7 +210,7 @@
           </div>
         </td>
         <td>{{ application.role }}</td>
-        <td>{{ application.date | date:  'dd MMM yyyy' }}</td>
+        <td>{{ application.date | date: 'dd MMM yyyy' }}</td>
         <td>{{ application.location }}</td>
         <td>{{ application.source }}</td>
         <td>

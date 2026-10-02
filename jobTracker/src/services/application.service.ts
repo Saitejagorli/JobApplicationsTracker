@@ -26,19 +26,21 @@ export class ApplicationService implements Application {
   updateApplication(id: string, updateFields: any): Observable<any> {
     return this.http.patch(
       `${environment.BASE_API}/applications/${id}`,
-      updateFields
+      updateFields,
     );
   }
 
   updateAttachments(id: string, attachment: any): Observable<any> {
     return this.http.post(
       `${environment.BASE_API}/applications/${id}/attachments`,
-      attachment
+      attachment,
     );
   }
 
-  deleteAttachment(id: string, fileId: string): Observable<any> {
-    return this.http.delete(`${environment.BASE_API}/applications/${id}/attachments/${fileId}`);
+  deleteAttachment(id: string, attachmentId: string): Observable<any> {
+    return this.http.delete(
+      `${environment.BASE_API}/applications/${id}/attachments/${attachmentId}`,
+    );
   }
 
   createApplication(data: any): Observable<any> {
@@ -52,5 +54,53 @@ export class ApplicationService implements Application {
   }
   getChartData(): Observable<any> {
     return this.http.get(`${environment.BASE_API}/applications/chart`);
+  }
+
+  getUploadUrl(
+    applicationId: string,
+    fileName: string,
+    contentType: string,
+    size: number,
+  ): Observable<any> {
+    return this.http.post(
+      `${environment.BASE_API}/applications/${applicationId}/attachments`,
+      {
+        fileName,
+        contentType,
+        size,
+      },
+    );
+  }
+
+  uploadFileToUrl(url: string, file: File): Observable<any> {
+    return this.http.put(url, file);
+  }
+
+  markAttachmentAsUploaded(
+    applicationId: string,
+    attachmentId: string,
+  ): Observable<any> {
+    return this.http.patch(
+      `${environment.BASE_API}/applications/${applicationId}/attachments/${attachmentId}/complete`,
+      {},
+    );
+  }
+
+  getViewUrlForAttachment(
+    applicationId: string,
+    attachmentId: string,
+  ): Observable<any> {
+    return this.http.get(
+      `${environment.BASE_API}/applications/${applicationId}/attachments/${attachmentId}/view`,
+    );
+  }
+
+  getDownloadUrlForAttachment(
+    applicationId: string,
+    attachmentId: string,
+  ): Observable<any> {
+    return this.http.get(
+      `${environment.BASE_API}/applications/${applicationId}/attachments/${attachmentId}/download`,
+    );
   }
 }

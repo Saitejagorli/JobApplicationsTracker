@@ -26,9 +26,12 @@ A full-stack application to manage and track job applications effectively, with 
 
 ![EditQuestions](./images/edit-questions.png)
 
+![Attachments](./images/attachments.png)
+
 ## Technologies Used
 
 - **Frontend:** Angular
 - **Backend:** Node.js, Express.js, MongoDB
+- **Cloud:** Appwrite
 - **AI Integration:** Flask, Crawl4AI, Gemini AI
 - **DevOps:** Docker, Docker Compose

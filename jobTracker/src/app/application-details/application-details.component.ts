@@ -1,53 +1,57 @@
-import { Component, inject, OnInit, ViewChild } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
-import { CommonModule } from '@angular/common';
-import { DatePipe } from '@angular/common';
-import { v4 as uuidv4 } from 'uuid';
+import { CommonModule, DatePipe } from '@angular/common';
+import { Component, inject, OnInit } from '@angular/core';
 import {
-  FormGroup,
-  FormBuilder,
-  ReactiveFormsModule,
-  Validators,
   FormArray,
-  FormControl,
+  FormBuilder,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators
 } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
+import { v4 as uuidv4 } from 'uuid';
 
+import { AccordionModule } from 'primeng/accordion';
+import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
+import { FileUploadModule } from 'primeng/fileupload';
+import { InputTextModule } from 'primeng/inputtext';
+import { ProgressBarModule } from 'primeng/progressbar';
+import { SkeletonModule } from 'primeng/skeleton';
 import { TagModule } from 'primeng/tag';
+import { TextareaModule } from 'primeng/textarea';
 import { TimelineModule } from 'primeng/timeline';
 import { ToastModule } from 'primeng/toast';
-import { SkeletonModule } from 'primeng/skeleton';
-import { AccordionModule } from 'primeng/accordion';
-import { InputTextModule } from 'primeng/inputtext';
-import { ButtonModule } from 'primeng/button';
-import { FileUploadModule } from 'primeng/fileupload';
-import { ProgressBarModule } from 'primeng/progressbar';
-import { TextareaModule } from 'primeng/textarea';
 
 import { MessageService } from 'primeng/api';
 
 import {
-  LucideAngularModule,
-  Pencil,
-  MapPin,
-  Trash,
-  Minus,
-  Paperclip,
+  ArrowDownToLine,
+  Eye,
   FileText,
   Image,
-  Eye,
-  ArrowDownToLine,
+  LucideAngularModule,
+  MapPin,
+  Minus,
+  Paperclip,
+  Pencil,
+  Trash,
   X,
 } from 'lucide-angular';
 
-import { finalize, lastValueFrom, switchMap, takeWhile, timer } from 'rxjs';
+import {
+  catchError,
+  finalize,
+  switchMap,
+  takeWhile,
+  tap,
+  throwError,
+  timer
+} from 'rxjs';
 
 import { ApplicationService } from '../../services/application.service';
-import { DrawerComponent } from '../drawer/drawer.component';
 import { DialogComponent } from '../dialog/dialog.component';
+import { DrawerComponent } from '../drawer/drawer.component';
 import { LoadingSpinnerComponent } from '../loading-spinner/loading-spinner.component';
-import { AppwriteService } from '../../services/appwrite.service';
-import { environment } from '../../environments/environment';
 
 interface Application {
   id: string;
@@ -69,17 +73,13 @@ interface Application {
 }
 
 interface Attachment {
-  $id: string;
-  bucketId: string;
-  $createdAt: string;
-  $updatedAt: string;
-  $permissions: string[];
-  name: string;
-  signature: string;
-  mimeType: string;
-  sizeOriginal: number;
-  chunksTotal: number;
-  chunksUploaded: number;
+  _id: string;
+  createdAt: string;
+  fileName: string;
+  contentType: string;
+  size: number;
+  status: 'PENDING' | 'UPLOADED' | 'FAILED';
+  objectKey: string;
 }
 
 interface Section {
@@ -165,8 +165,7 @@ export class ApplicationDetailsComponent implements OnInit {
     private appService: ApplicationService,
     private route: ActivatedRoute,
     private router: Router,
-    private appwriteService: AppwriteService,
-    private messageService: MessageService
+    private messageService: MessageService,
   ) {
     this.id = this.route.snapshot.paramMap.get('id') || '';
   }
@@ -272,7 +271,7 @@ export class ApplicationDetailsComponent implements OnInit {
       questions: this.formBuilder.array(
         data?.questions?.length
           ? data.questions.map((q) => this.createQuestion(q))
-          : [this.createQuestion()]
+          : [this.createQuestion()],
       ),
     });
   }
@@ -281,7 +280,7 @@ export class ApplicationDetailsComponent implements OnInit {
     timer(0, 3000)
       .pipe(
         switchMap(() => this.appService.getApplication(this.id)),
-        takeWhile((res) => res.data.description === 'Processing...', true)
+        takeWhile((res) => res.data.description === 'Processing...', true),
       )
       .subscribe({
         next: (res) => {
@@ -301,7 +300,7 @@ export class ApplicationDetailsComponent implements OnInit {
   }
 
   getSeverity(
-    status?: string | null
+    status?: string | null,
   ): 'success' | 'danger' | 'info' | undefined {
     switch (status) {
       case 'offered':
@@ -336,7 +335,7 @@ export class ApplicationDetailsComponent implements OnInit {
 
   openDeleteDialog(
     context: 'application' | 'attachment',
-    attachmentId?: string
+    attachmentId?: string,
   ) {
     this.deleteContext = context;
     this.attachmentIdToDelete = attachmentId || null;
@@ -354,6 +353,9 @@ export class ApplicationDetailsComponent implements OnInit {
   }
 
   onDeleteConfirm() {
+    console.log(
+      `Deleting ${this.deleteContext} with ID: ${this.attachmentIdToDelete}`,
+    );
     if (this.deleteContext === 'application') {
       this.deleteApplication();
     } else if (
@@ -372,7 +374,7 @@ export class ApplicationDetailsComponent implements OnInit {
       .pipe(
         finalize(() => {
           this.deleteDialogVisible = false;
-        })
+        }),
       )
       .subscribe({
         next: () => {
@@ -414,11 +416,11 @@ export class ApplicationDetailsComponent implements OnInit {
   onSubmit() {
     console.log(this.applicationForm.value);
     console.log(
-      this.getChangedFields(this.application, this.applicationForm.value)
+      this.getChangedFields(this.application, this.applicationForm.value),
     );
     const updateFields = this.getChangedFields(
       this.application,
-      this.applicationForm.value
+      this.applicationForm.value,
     );
     if (updateFields && Object.keys(updateFields).length > 0) {
       this.appService
@@ -431,7 +433,7 @@ export class ApplicationDetailsComponent implements OnInit {
               this.getApplication();
               this.pollApplication();
             }, 800);
-          })
+          }),
         )
         .subscribe({
           next: (res) => {
@@ -480,7 +482,7 @@ export class ApplicationDetailsComponent implements OnInit {
           setTimeout(() => {
             this.getApplication();
           }, 800);
-        })
+        }),
       )
       .subscribe({
         next: (res) => {
@@ -501,7 +503,7 @@ export class ApplicationDetailsComponent implements OnInit {
           });
         },
       });
-  } 
+  }
 
   get sections(): FormArray {
     return this.questionsForm.get('sections') as FormArray;
@@ -545,7 +547,7 @@ export class ApplicationDetailsComponent implements OnInit {
         finalize(() => {
           this.questionsEditable = false;
           this.getApplication();
-        })
+        }),
       )
       .subscribe({
         next: (res) => {
@@ -586,15 +588,37 @@ export class ApplicationDetailsComponent implements OnInit {
   }
 
   previewFile(file: any) {
-    const url = `${environment.APPWRITE_ENDPOINT}/storage/buckets/${file.bucketId}/files/${file.$id}/view?project=${environment.APPWRITE_PROJECT_ID}&mode=admin`;
-    console.log('view URL:', url);
-    window.open(url, '_blank');
+    this.appService.getViewUrlForAttachment(this.id, file._id).subscribe({
+      next: (res) => {
+        const viewUrl = res.data.viewUrl;
+        window.open(viewUrl, '_blank');
+      },
+      error: (err) => {
+        console.error('Failed to get view URL for attachment', err);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Failed to get view URL for attachment',
+        });
+      },
+    });
   }
 
   downloadFile(file: any) {
-    const url = `${environment.APPWRITE_ENDPOINT}/storage/buckets/${file.bucketId}/files/${file.$id}/download?project=${environment.APPWRITE_PROJECT_ID}&mode=admin`;
-    console.log('Download URL:', url);
-    window.open(url, '_blank');
+    this.appService.getDownloadUrlForAttachment(this.id, file._id).subscribe({
+      next: (res) => {
+        const downloadUrl = res.data.downloadUrl;
+        window.open(downloadUrl, '_blank');
+      },
+      error: (err) => {
+        console.error('Failed to get download URL for attachment', err);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Failed to get download URL for attachment',
+        });
+      },
+    });
   }
 
   onSelectFile(event: any) {
@@ -609,98 +633,97 @@ export class ApplicationDetailsComponent implements OnInit {
     this.fileName = '';
   }
 
-  async upload() {
+  async uploadFile() {
     if (!this.selectedFile) return;
-
-    try {
-      this.uploading = true;
-
-      const response = await this.appwriteService.uploadFile(
-        this.selectedFile,
-        environment.ATTACHMENTS_BUCKET_ID
-      );
-
-      console.log('Upload response:', response);
-
-      this.appService.updateAttachments(this.id, response).subscribe({
-        next: (res) => {
-          console.log('Attachment updated:', res);
-
-          // ✅ Show success message after update
-          this.messageService.add({
-            severity: 'success',
-            summary: 'Success',
-            detail: 'Uploaded Successfully',
-            life: 5000,
-          });
-
-          // ✅ Now refresh after update is successful
+    this.uploading = true;
+    this.appService
+      .getUploadUrl(
+        this.id,
+        this.selectedFile.name,
+        this.selectedFile.type,
+        this.selectedFile.size,
+      )
+      .pipe(
+        switchMap((res) => {
+          const uploadUrl = res.data.uploadUrl;
+          return this.appService
+            .uploadFileToUrl(uploadUrl, this.selectedFile!)
+            .pipe(
+              switchMap(() => {
+                return this.appService.markAttachmentAsUploaded(
+                  this.id,
+                  res.data.attachmentId,
+                );
+              }),
+            );
+        }),
+        tap(() => {
           setTimeout(() => {
             this.getApplication();
           }, 800);
-        },
-        error: (err) => {
-          console.error(err);
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Success',
+            detail: 'File uploaded successfully!',
+          });
+        }),
+        catchError((err) => {
+          console.error('Error during file upload:', err);
           this.messageService.add({
             severity: 'error',
             summary: 'Error',
             detail: 'Failed to update application',
           });
-        },
-        complete: () => {
+
+          return throwError(() => new Error('File upload failed'));
+        }),
+
+        finalize(() => {
           this.uploadDialogueVisible = false;
           this.selectedFile = null;
           this.fileName = '';
           this.uploading = false;
-        },
-      });
-    } catch (error) {
-      console.error(error);
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Error',
-        detail: 'Failed to upload file',
-      });
-
-      // Cleanup even on error
-      this.uploadDialogueVisible = false;
-      this.selectedFile = null;
-      this.fileName = '';
-      this.uploading = false;
-    }
+        }),
+      )
+      .subscribe();
   }
 
-  async deleteFile(fileId: string) {
-    try {
-      // Step 1: Remove from DB (MongoDB)
-      await lastValueFrom(this.appService.deleteAttachment(this.id, fileId));
+  async deleteFile(attachmentId: string) {
+    this.appService
+      .deleteAttachment(this.id, attachmentId)
+      .pipe(
+        tap(() => {
+          //Refresh UI
+          setTimeout(() => {
+            this.getApplication();
+          }, 800);
 
-      // Step 2: Delete from Appwrite storage
-      await this.appwriteService.deleteFile(
-        environment.ATTACHMENTS_BUCKET_ID,
-        fileId
-      );
+          //Show toast
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Deleted',
+            detail: 'Attachment deleted successfully',
+          });
+        }),
+        catchError((err) => {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Failed to delete attachment',
+          });
+          return throwError(
+            () => new Error('Failed to delete attachment', err),
+          );
+        }),
+      )
+      .subscribe();
+  }
 
-      // Step 3: Refresh UI
-      setTimeout(() => {
-        this.getApplication();
-      }, 800);
-
-      // Step 4: Show toast
-      this.messageService.add({
-        severity: 'success',
-        summary: 'Deleted',
-        detail: 'Attachment deleted successfully',
-      });
-    } catch (error) {
-      console.error('Error deleting attachment:', error);
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Error',
-        detail: 'Failed to delete attachment',
-      });
-    } finally {
-      // this.uploading = false;
-    }
+  getUploadedAttachments(): Attachment[] {
+    return (
+      this.application?.attachments?.filter(
+        (file) => file.status === 'UPLOADED',
+      ) || []
+    );
   }
 }

@@ -209,7 +209,7 @@
     <p-button icon="pi pi-plus" label="Add" (onClick)="uploadDialogueVisible = true" />
   </div>
 
-  @if ((application?.attachments ?? []).length > 0) {
+  @if (getUploadedAttachments().length > 0) {
   <div class="overflow-x-auto">
     <!-- Table headers for larger screens -->
     <div class="hidden md:grid grid-cols-12 gap-4 font-semibold text-gray-600 mb-2 px-2">
@@ -220,25 +220,25 @@
     </div>
 
     <!-- File items -->
-    @for (file of application?.attachments; track file.$id) {
+    @for (file of getUploadedAttachments(); track file._id) {
     <div class="grid grid-cols-1 md:grid-cols-12 gap-2 mb-4 p-2 border-b border-gray-200 items-center">
       <!-- File name -->
       <div class="flex items-center gap-2 col-span-1 md:col-span-6">
-        <lucide-angular [img]="getIconForMime(file.mimeType)" class="text-[var(--p-primary-color)]"
+        <lucide-angular [img]="getIconForMime(file.contentType)" class="text-[var(--p-primary-color)]"
           size="20"></lucide-angular>
-        <span class="truncate">{{ file.name }}</span>
+        <span class="truncate">{{ file.fileName }}</span>
       </div>
 
       <!-- File size -->
       <div class="flex md:block col-span-1 md:col-span-2">
         <span class="text-gray-500 md:hidden mr-2">Size:</span>
-        <span>{{ formatFileSize(file.sizeOriginal) }}</span>
+        <span>{{ formatFileSize(file.size) }}</span>
       </div>
 
       <!-- Date -->
       <div class="flex md:block col-span-1 md:col-span-2">
         <span class="text-gray-500 md:hidden mr-2">Date:</span>
-        <span>{{ formatDate(file.$createdAt) }}</span>
+        <span>{{ formatDate(file.createdAt) }}</span>
       </div>
 
       <!-- Actions -->
@@ -248,7 +248,7 @@
         <lucide-angular [img]="ArrowDownToLine" class="text-[var(--p-primary-color)] cursor-pointer hover:opacity-80"
           size="20" (click)="downloadFile(file)" />
         <lucide-angular [img]="Trash" class="text-[var(--p-primary-color)] cursor-pointer hover:opacity-80" size="20"
-          (click)="openDeleteDialog('attachment', file.$id)" />
+          (click)="openDeleteDialog('attachment', file._id)" />
       </div>
     </div>
     }
@@ -261,7 +261,7 @@
 
 
 <app-dialog [visible]="uploadDialogueVisible" title="Upload Attachment" [btnText]="uploading? 'Uploading...' : 'Upload'"
-  (close)="uploadDialogueVisible=false" (submit)="upload()" [btnDisable]="uploading || !selectedFile">
+  (close)="uploadDialogueVisible=false" (submit)="uploadFile()" [btnDisable]="uploading || !selectedFile">
   <div>
     <div class="flex gap-4 justify-center items-center m-2 p-4">
       <p-fileUpload #fu mode="basic" chooseLabel="Choose" chooseIcon="pi pi-upload" name="file" customUpload="true"

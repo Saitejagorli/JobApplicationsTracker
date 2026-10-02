@@ -14,21 +14,17 @@ const sectionSchema = new mongoose.Schema({
 });
 
 const attachmentSchema = new mongoose.Schema({
-  $id: String,
-  bucketId: String,
-  $createdAt: String,
-  $updatedAt: String,
-  $permissions: [String],
-  name: String,
-  signature: String,
-  mimeType: String,
-  sizeOriginal: Number,
-  chunksTotal: Number,
-  chunksUploaded: Number,
-}, { _id: false });
-
-
-
+  fileName: { type: String, required: true },
+  contentType: { type: String, required: true },
+  size: { type: Number, required: true },
+  objectKey: { type: String, required: true },
+  status: {
+    type: String,
+    enum: ["PENDING", "UPLOADED", "FAILED"],
+    required: true,
+  },
+  createdAt: { type: Date, default: Date.now },
+});
 
 const applicationSchema = new mongoose.Schema({
   companyName: {
@@ -104,7 +100,7 @@ const applicationSchema = new mongoose.Schema({
     default: false,
   },
   interviewQuestions: [sectionSchema],
-  attachments:[attachmentSchema],
+  attachments: [attachmentSchema],
 });
 
 const Application = mongoose.model("Application", applicationSchema);
